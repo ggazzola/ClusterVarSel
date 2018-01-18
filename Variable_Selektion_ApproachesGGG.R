@@ -14,8 +14,6 @@
 
 #Importance may throw an error in super small instances, where importance is NaN for some reason
 # load required packages
-library("party"); #attach(asNamespace("party")) # version 1.0-0
-library("randomForest")
 source("ExtraRFCode.R")
 ####################################
 ### The NAP and NAP.b approaches ###
