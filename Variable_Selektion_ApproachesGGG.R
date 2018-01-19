@@ -193,7 +193,7 @@ ALTGGG <- function(Y, X, nperm = 400, ntree = 100, alpha = 0.05, type="randomFor
 ############################################
 ### The J.0, J.1, D.0 and D.1 approaches ###
 ############################################
-DiazGGG <- function(Y, X, recompute = F, ntree = 2000, type="randomForest") {
+DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest") {
 #For Diaz paper, suggested ntree is 2000 or 5000
 #For Jiang, ntree = 10000, but the implementation is actually different from this one
 # Y: response vector
