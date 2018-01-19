@@ -554,7 +554,7 @@ if(what == "OzoneNumNoV9") {
 }
 
 if(what == "OzoneNum") {
-	#n=366, p=13
+	#n=203 (b/c of missing data -- originally n=366), p=13
 	#3 categorical time variables converted to numeric
 	trueModelX = expression({
 		fileName = "OzoneNum"
@@ -975,7 +975,7 @@ if(what == "BirthWeight") {
 		X[,4] =as.factor(X[,4])
 	})
 	
-	trueWeightY = expression({
+	trueModelY = expression({
 		Y = birthwt[ , 10] # regression, as done in Hapfelmeier
 	})	
 	
@@ -990,9 +990,10 @@ if(what == "Heart") {
 		X = dat[ , 1:13]
 		for(i in c(3,7,11,13))
 			X[,i] =as.factor(X[,i])
+		X=X
 	})
 	
-	trueWeightY = expression({
+	trueModelY = expression({
 		Y = as.data.frame(as.factor(dat[ , 14])) # regression, as done in Hapfelmeier
 	})	
 }
@@ -1004,7 +1005,7 @@ if(what == "BostonNoTown") {
 		data(BostonHousing2)
 		dd = BostonHousing2
 		dd = dd[, !(names(dd))%in% c("tract", "town", "medv")] # town is categorical and has 92 values, more than randomForest can handle
-		dd$chas = as.numeric(dd$chas) # chas is boolean
+		dd$chas = as.numeric(dd$chas) # chas is boolean, here treated as numeric
 		ddTmp = dd
 		ddTmp$cmedv=NULL
 		nPts = nrow(ddTmp)
