@@ -9,19 +9,19 @@ tmpFileName=temporaryFile.tmp
 if (( $alreadyWrittenLineSubWrapper == 1 )); then
 	echo "Warning: removing and rewriting header in SubWrapper.R"
 	sed '1d' SubWrapper.R > $tmpFileName
-	mv $tmpFileName > SubWrapper.R
+	mv $tmpFileName SubWrapper.R
 fi
 
 if (( $alreadyWrittenLineResGGGNew == 1 )); then
 	echo "Warning: removing and rewriting header in ResGGGNew.R "
 	sed '1d' ResGGGNew.R > $tmpFileName
-	mv $tmpFileName > ResGGGNew.R
+	mv $tmpFileName ResGGGNew.R
 fi
 
 if (( $alreadyWrittenLineTestAgain == 1 )); then
 	echo "Warning: removing and rewriting header in TestAgain.R"
 	sed '1d' TestAgain.R > $tmpFileName
-	mv $tmpFileName > TestAgain.R
+	mv $tmpFileName TestAgain.R
 fi
 
 
