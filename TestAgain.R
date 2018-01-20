@@ -1,4 +1,3 @@
-#!/usr/bin/env Rscript
 
 inputVals = commandArgs(trailingOnly=TRUE)
 if (length(inputVals)>1 ) {

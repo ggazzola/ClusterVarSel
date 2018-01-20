@@ -1,7 +1,4 @@
-#!/usr/bin/env Rscript
 
-
-#fileName = "12DLinearN250CorPow4CART"
 stdErrToKeep = seq(0, 5, .25)
 
 fileName = commandArgs(trailingOnly=TRUE)
