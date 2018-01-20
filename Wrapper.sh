@@ -10,18 +10,21 @@ if (( $alreadyWrittenLineSubWrapper == 1 )); then
 	echo "Warning: removing and rewriting header in SubWrapper.R"
 	sed '1d' SubWrapper.R > $tmpFileName
 	mv $tmpFileName SubWrapper.R
+	chmod a+x SubWrapper.R
 fi
 
 if (( $alreadyWrittenLineResGGGNew == 1 )); then
 	echo "Warning: removing and rewriting header in ResGGGNew.R "
 	sed '1d' ResGGGNew.R > $tmpFileName
 	mv $tmpFileName ResGGGNew.R
+	chmod a+x ResGGGNew.R
 fi
 
 if (( $alreadyWrittenLineTestAgain == 1 )); then
 	echo "Warning: removing and rewriting header in TestAgain.R"
 	sed '1d' TestAgain.R > $tmpFileName
 	mv $tmpFileName TestAgain.R
+	chmod a+x TestAgain.R
 fi
 
 
