@@ -77,6 +77,55 @@ if(what == "6DMixed") {
 	})
 }
 
+if(what == "Hapf20D") {
+	fileName = paste("Hapf20DLinearN", nPts, sep="")
+
+	trueModelX = expression({ #Hapf20D
+		dims = 20
+		Cov <- matrix(0, dims, dims) 
+		Cov[4:6,4:6] = covVal
+		Cov[7:11,7:11] = covVal
+		Cov[12:13,12:13] = covVal
+		
+		diag(Cov)[] <- 1
+		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
+	})
+
+	trueModelY = expression({ #Hapf20D
+		beta = c(3,2,1,3,2,1,3,2, 1, rep(0, 11))
+		cleanY = X%*%beta
+		noiseLevY = NoiseLevel(beta, Cov, desiredRsq) 
+		Y = cleanY + rnorm(nPts, 0, noiseLevY)
+		
+	}) # without main effects, the random forest has worse performance
+}
+
+if(what == "Hapf20DClass") {
+	fileName = paste("Hapf20DClassN", nPts, sep="")
+
+	trueModelX = expression({ #Hapf20D
+		dims = 20
+		Cov <- matrix(0, dims, dims) 
+		Cov[4:6,4:6] = covVal
+		Cov[7:11,7:11] = covVal
+		Cov[12:13,12:13] = covVal
+		
+		diag(Cov)[] <- 1
+		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
+	})
+
+	trueModelY = expression({ #Hapf20D
+		beta = c(3,2,1,3,2,1,3,2, 1, rep(0, 11))
+		rawY = X%*%beta
+		probY = exp(rawY)/(1+exp(rawY))
+		Y = numeric(nPts)
+		for(i in 1:nPts)
+			Y[i] = rbinom(1, 1, probY[i])
+		Y = data.frame(Y=as.factor(Y))		
+		
+	}) # without main effects, the random forest has worse performance
+}
+
 if(what == "12DLinear") {
 	fileName = paste("12DLinearN", nPts, sep="")
 
