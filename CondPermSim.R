@@ -78,7 +78,7 @@ if(what == "6DMixed") {
 }
 
 if(what == "Hapf20D") {
-	fileName = paste("Hapf20DLinearN", nPts, sep="")
+	fileName = paste("Hapf20DN", nPts, "Cov", covVal, "Rsq", desiredRsq, sep="")
 
 	trueModelX = expression({ #Hapf20D
 		dims = 20
@@ -100,10 +100,62 @@ if(what == "Hapf20D") {
 	}) # without main effects, the random forest has worse performance
 }
 
+
+
+if(what == "Hapf11DPoly2") {
+	fileName = paste("Hapf11DPoly2N", nPts, sep="")
+	# underlying linear + square + mixed terms; only linear (raw variables) given as input
+	trueModelX = expression({ #
+		degree = 2
+		
+		dims = 11
+		Cov <- matrix(0, dims, dims) 
+		Cov[4:6,4:6] = covVal
+		Cov[7:11,7:11] = covVal # same as Hapf20D but without the last 9 variables, all irrelevant
+		diag(Cov)[] <- 1
+		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
+		Xpoly = scale(poly(X, degree=degree, raw=T)) # this won't be given as input to the model 
+													# is there a way to define a multivariate chisquare?
+													
+		XForCovEstimate = mvrnorm(100000, rep(0, nrow(Cov)), Sigma = Cov)
+		XpolyForCovEstimate = scale(poly(XForCovEstimate, degree=degree, raw=T)) # this won't be given as input to the model 
+																								# is there a way to define a multivariate chisquare?
+		rm(XForCovEstimate)
+		CovPoly = cov(XpolyForCovEstimate) #TO FIX!!! -- this is just an estimate
+												
+	})
+
+	trueModelY = expression({ #
+		beta = c(3,2,1,3,2,1,3,2, 1, 0, 0)
+		degreeTerm = attr(Xpoly, "degree")
+		coefPertinence = unname(colnames(Xpoly))
+		betaAll = rep(1, ncol(Xpoly))
+		splitPertinence =  strsplit(coefPertinence, "[.]")
+		pertinenceMat = NULL
+		for(i in 1:length(splitPertinence)){
+			pertinenceMat = rbind(pertinenceMat, as.numeric(splitPertinence[[i]])) # i-th row corresponds to the i-th poly variable (which could be a raw or transformed variable); j-th column is non-zero if i-th variable is either the j-th raw variable or a poly (possibly mixed) xform of the j-th raw variable. 2 means quadratic xform, 1 means raw, (1,...,1) means mixed transform
+			
+			for (j in 1:ncol(pertinenceMat)){
+				betaAll[i] = betaAll[i] * (beta[j])^(pertinenceMat[i,j]) # beta of poly variable is either the original beta, if raw variable, or the square of the original beta, if squared xform, or the product of the two original betas, if mixed xform
+				signBetaAll = sign(betaAll[i])
+				betaAllAbs = abs(betaAll[i])
+			}
+			betaAll[i] = signBetaAll*betaAllAbs^(1/degreeTerm[i]) #if linear term is -, quadratic is + 
+			# note betaAllAbs^(1/degreeTerm[i]) is geometric mean of the abs of the two (or 1) betas
+		}
+		 # if a variable is useless by itself, it will make any of its transformations/combinations useless
+		cleanY = Xpoly%*%betaAll
+		noiseLevY = NoiseLevel(betaAll, CovPoly, desiredRsq) 
+		Y = cleanY + rnorm(nPts, 0, noiseLevY)
+		
+	}) # without main effects, the random forest has worse performance
+}
+
+
 if(what == "Hapf20DClass") {
 	fileName = paste("Hapf20DClassN", nPts, sep="")
 
-	trueModelX = expression({ #Hapf20D
+	trueModelX = expression({ #Hapf20DClass
 		dims = 20
 		Cov <- matrix(0, dims, dims) 
 		Cov[4:6,4:6] = covVal
@@ -114,7 +166,7 @@ if(what == "Hapf20DClass") {
 		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
 	})
 
-	trueModelY = expression({ #Hapf20D
+	trueModelY = expression({ #Hapf20DClass
 		beta = c(3,2,1,3,2,1,3,2, 1, rep(0, 11))
 		rawY = X%*%beta
 		probY = exp(rawY)/(1+exp(rawY))
@@ -346,10 +398,15 @@ if(what == "12DPoly2") {
 		Cov <- matrix(0, dims, dims) 
 		Cov[1:4,1:4] = covVal
 		diag(Cov)[] <- 1
-		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)[]
+		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
 		Xpoly = scale(poly(X, degree=degree, raw=T)) # this won't be given as input to the model 
 													# is there a way to define a multivariate chisquare?
-		#CovPoly = cov(XpolyCOVTOFIX) #COVTOFIX!!!!!!!!!!!!!!!!!!
+													
+		XForCovEstimate = mvrnorm(100000, rep(0, nrow(Cov)), Sigma = Cov)
+		XpolyForCovEstimate = scale(poly(XForCovEstimate, degree=degree, raw=T)) # this won't be given as input to the model 
+																								# is there a way to define a multivariate chisquare?
+		rm(XForCovEstimate)
+		CovPoly = cov(XpolyForCovEstimate) #TO FIX!!! -- this is just an estimate
 												
 	})
 
@@ -361,13 +418,15 @@ if(what == "12DPoly2") {
 		splitPertinence =  strsplit(coefPertinence, "[.]")
 		pertinenceMat = NULL
 		for(i in 1:length(splitPertinence)){
-			pertinenceMat = rbind(pertinenceMat, as.numeric(splitPertinence[[i]]))
+			pertinenceMat = rbind(pertinenceMat, as.numeric(splitPertinence[[i]])) # i-th row corresponds to the i-th poly variable (which could be a raw or transformed variable); j-th column is non-zero if i-th variable is either the j-th raw variable or a poly (possibly mixed) xform of the j-th raw variable. 2 means quadratic xform, 1 means raw, (1,...,1) means mixed transform
+			
 			for (j in 1:ncol(pertinenceMat)){
-				betaAll[i] = betaAll[i] * (beta[j])^(pertinenceMat[i,j])
+				betaAll[i] = betaAll[i] * (beta[j])^(pertinenceMat[i,j]) # beta of poly variable is either the original beta, if raw variable, or the square of the original beta, if squared xform, or the product of the two original betas, if mixed xform
 				signBetaAll = sign(betaAll[i])
 				betaAllAbs = abs(betaAll[i])
 			}
-			betaAll[i] = signBetaAll*betaAllAbs^(1/degreeTerm[i]) #if linear term is -, quadratic is +
+			betaAll[i] = signBetaAll*betaAllAbs^(1/degreeTerm[i]) #if linear term is -, quadratic is + 
+			# note betaAllAbs^(1/degreeTerm[i]) is geometric mean of the abs of the two (or 1) betas
 		}
 		 # if a variable is useless by itself, it will make any of its transformations/combinations useless
 		cleanY = Xpoly%*%betaAll
