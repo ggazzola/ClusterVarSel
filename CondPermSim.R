@@ -78,7 +78,7 @@ if(what == "6DMixed") {
 }
 
 if(what == "Hapf20D") {
-	fileName = paste("Hapf20DN", nPts, "Cov", covVal, "Rsq", desiredRsq, sep="")
+	fileName = paste("Hapf20DN", nPts, "Cov", covVal, "Rsq", desiredRsq, "Pow", corPower, sep="")
 
 	trueModelX = expression({ #Hapf20D
 		dims = 20
