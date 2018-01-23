@@ -103,7 +103,10 @@ if(what == "Hapf20D") {
 
 
 if(what == "Hapf11DPoly2") {
-	fileName = paste("Hapf11DPoly2N", nPts, sep="")
+	# Run with 
+	#nPts = 300
+	#desiredRsq = 0.9
+	fileName = paste("Hapf11DPoly2N", nPts, "Cov", covVal, "Rsq", desiredRsq, "Pow", corPower, "minNum", minNumPtsPerPart, sep="")
 	# underlying linear + square + mixed terms; only linear (raw variables) given as input
 	trueModelX = expression({ #
 		degree = 2
@@ -122,7 +125,63 @@ if(what == "Hapf11DPoly2") {
 																								# is there a way to define a multivariate chisquare?
 		rm(XForCovEstimate)
 		CovPoly = cov(XpolyForCovEstimate) #TO FIX!!! -- this is just an estimate
+		X
 												
+	})
+
+	trueModelY = expression({ #
+		beta = c(3,2,1,3,2,1,3,2, 1, 0, 0)
+		degreeTerm = attr(Xpoly, "degree")
+		coefPertinence = unname(colnames(Xpoly))
+		betaAll = rep(1, ncol(Xpoly))
+		splitPertinence =  strsplit(coefPertinence, "[.]")
+		pertinenceMat = NULL
+		for(i in 1:length(splitPertinence)){
+			pertinenceMat = rbind(pertinenceMat, as.numeric(splitPertinence[[i]])) # i-th row corresponds to the i-th poly variable (which could be a raw or transformed variable); j-th column is non-zero if i-th variable is either the j-th raw variable or a poly (possibly mixed) xform of the j-th raw variable. 2 means quadratic xform, 1 means raw, (1,...,1) means mixed transform
+			
+			for (j in 1:ncol(pertinenceMat)){
+				betaAll[i] = betaAll[i] * (beta[j])^(pertinenceMat[i,j]) # beta of poly variable is either the original beta, if raw variable, or the square of the original beta, if squared xform, or the product of the two original betas, if mixed xform
+				signBetaAll = sign(betaAll[i])
+				betaAllAbs = abs(betaAll[i])
+			}
+			betaAll[i] = signBetaAll*betaAllAbs^(1/degreeTerm[i]) #if linear term is -, quadratic is + 
+			# note betaAllAbs^(1/degreeTerm[i]) is geometric mean of the abs of the two (or 1) betas
+		}
+		 # if a variable is useless by itself, it will make any of its transformations/combinations useless
+		cleanY = Xpoly%*%betaAll
+		noiseLevY = NoiseLevel(betaAll, CovPoly, desiredRsq) 
+		Y = cleanY + rnorm(nPts, 0, noiseLevY)
+		
+	}) # without main effects, the random forest has worse performance
+}
+
+
+if(what == "Hapf11DExplicitPoly2") {
+	# Run with 
+	#nPts = 300
+	#desiredRsq = 0.9
+	
+	fileName = paste("Hapf11DExplicitPoly2N", nPts, "Cov", covVal, "Rsq", desiredRsq, "Pow", corPower, "minNum", minNumPtsPerPart, sep="")
+	# raw variables + degree-2 polynomial terms, all *explicitly specified* as X input
+	# excluding terms with zero importance 
+	# linear and corresponding quadratic terms are, possibly, "redundant", but their correlation is zero
+	# But there are correlations within quadratic and within linear terms
+	trueModelX = expression({ #
+		degree = 2
+		dims = 11
+		Cov <- matrix(0, dims, dims) 
+		Cov[4:6,4:6] = covVal
+		Cov[7:11,7:11] = covVal # same as Hapf20D but without the last 9 variables, all irrelevant
+		diag(Cov)[] <- 1
+		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
+		Xpoly = scale(poly(X, degree=degree, raw=T)) # this will be given as input to the model 
+													
+		XForCovEstimate = mvrnorm(100000, rep(0, nrow(Cov)), Sigma = Cov)
+		XpolyForCovEstimate = scale(poly(XForCovEstimate, degree=degree, raw=T)) 
+																								
+		rm(XForCovEstimate)
+		CovPoly = cov(XpolyForCovEstimate) #TO FIX!!! -- this is just an estimate
+		Xpoly
 	})
 
 	trueModelY = expression({ #
