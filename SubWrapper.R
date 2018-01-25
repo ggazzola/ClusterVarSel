@@ -26,9 +26,10 @@ defaultMtry = T  ############################
 bigDataSets = c("brain", "Leukemia", "lymphoma", "prostate", "srbct", "Colon", "Nci", "Adenocarcinoma", "Breast2Class", "Breast3Class")
 if(what%in%c("fMRI",bigDataSets)){
 	leaveOneOut = T
+	numFolds = 10 ############################ # ignored if leaveOneOut = T
 } else {
 	leaveOneOut = F #################
-	numFolds =  10 ############################ # ignored if leaveOneOut = T
+	numFolds =  10 
 }
 
 if(what%in%bigDataSets){
