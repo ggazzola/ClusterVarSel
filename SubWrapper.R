@@ -14,7 +14,7 @@ objInEnv=objInEnv[objInEnv!="numRepeats" & objInEnv!="partRepeat" & objInEnv!="d
 rm(list = objInEnv)
 
 ### --- Params declaration starts here --- ###	
-what = "Heart" #12DLinear, 24DLinear, Ozone[Num],  Ionosphere,  BostonNoTown, BreastNumNoId, Sonar, Glass, fMRI, brain , srbct, lymphoma, prostate, Parkinsons
+what = "Heart" #Hapf20D, Hapf20DDecreasCov, Hapf20DClass, Hapf11DPoly2, Hapf11DExplicitPoly2, 12DLinear, 24DLinear, Ozone[Num],  Ionosphere,  BostonNoTown, BreastNumNoId, Sonar, Glass, fMRI, brain , srbct, lymphoma, prostate, Parkinsons
 # WHY FOR FMRI NEED MORE STERRORS TO REACH  PERFORMANCE AS GOOD AS, E.G., DIAZ1? SHOULDN'T HAVE TO DO WITH THE WAY SERR IS CALCULATED 
 #	B/C IF USE DEFMTRY SHOULD BE THE SAME AS FOR COMPETING METHODS
 extraNam = "" ###############

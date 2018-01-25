@@ -100,6 +100,41 @@ if(what == "Hapf20D") {
 	}) # without main effects, the random forest has worse performance
 }
 
+DecreasingCov = function(Cov, covVal, rowColIdx, step=0.2){
+	for(i in rowColIdx){
+		for(j in rowColIdx){
+			if(i!=j){
+				Cov[i,j] = Cov[j,i] = covVal-(abs(j-i)-1)*step
+				stopifnot(abs(Cov[i,j])<1)
+			}
+		}
+	}
+	return(Cov)
+}
+
+if(what == "Hapf20DDecreasCov") {
+	fileName = paste("Hapf20DDiffCovN", nPts, "Cov", covVal, "Rsq", desiredRsq, "Pow", corPower, "minNum", minNumPtsPerPart, sep="")
+
+	trueModelX = expression({ 
+		dims = 20
+		Cov <- matrix(0, dims, dims) 
+		Cov = DecreasingCov(Cov, covVal, 4:6)
+		Cov = DecreasingCov(Cov, covVal, 7:11)
+		Cov = DecreasingCov(Cov, covVal, 12:13)
+		diag(Cov)[] <- 1
+		tmp = solve(Cov) # will fail if singular
+		rm(tmp) 
+		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
+	})
+
+	trueModelY = expression({ 
+		beta = c(3,2,1,3,2,1,3,2, 1, rep(0, 11))
+		cleanY = X%*%beta
+		noiseLevY = NoiseLevel(beta, Cov, desiredRsq) 
+		Y = cleanY + rnorm(nPts, 0, noiseLevY)
+		
+	}) # without main effects, the random forest has worse performance
+}
 
 
 if(what == "Hapf11DPoly2") {
