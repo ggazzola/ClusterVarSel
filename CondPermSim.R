@@ -33,6 +33,19 @@ Discretize = function(x, quantileStepNum = 4) {
 	return(tmpX)
 }
 
+
+DecreasingCov = function(Cov, covVal, rowColIdx, step=0.2){
+	for(i in rowColIdx){
+		for(j in rowColIdx){
+			if(i!=j){
+				Cov[i,j] = Cov[j,i] = covVal-(abs(j-i)-1)*step
+				stopifnot(abs(Cov[i,j])<1)
+			}
+		}
+	}
+	return(Cov)
+}
+
 if(what == "6DMixed") {
 	fileName = paste("6DMixedN", nPts, sep="")
 
@@ -100,16 +113,35 @@ if(what == "Hapf20D") {
 	}) # without main effects, the random forest has worse performance
 }
 
-DecreasingCov = function(Cov, covVal, rowColIdx, step=0.2){
-	for(i in rowColIdx){
-		for(j in rowColIdx){
-			if(i!=j){
-				Cov[i,j] = Cov[j,i] = covVal-(abs(j-i)-1)*step
-				stopifnot(abs(Cov[i,j])<1)
-			}
-		}
-	}
-	return(Cov)
+
+if(what == "HapfMixed20D") {
+	fileName = paste("HapfMixed20DN", nPts, "Cov", covVal, "Rsq", desiredRsq, "Pow", corPower, "minNum", minNumPtsPerPart, sep="")
+
+	trueModelX = expression({ 
+		dims = 20
+		Cov <- matrix(0, dims, dims) 
+		Cov[4:6,4:6] = covVal
+		Cov[7:11,7:11] = covVal
+		Cov[12:13,12:13] = covVal
+		
+		diag(Cov)[] <- 1
+		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
+		XBack = as.matrix(X)
+		X[,1] = Discretize(X[,1])
+		X[,4] = Discretize(X[,4])
+		X[,7] = Discretize(X[,7])
+		X[,11] = Discretize(X[,11])
+		X[,13] = Discretize(X[,13])
+		
+	})
+
+	trueModelY = expression({ 
+		beta = c(3,2,1,3,2,1,3,2, 1, rep(0, 11))
+		cleanY = XBack%*%beta
+		noiseLevY = NoiseLevel(beta, Cov, desiredRsq) 
+		Y = cleanY + rnorm(nPts, 0, noiseLevY)
+		
+	}) # without main effects, the random forest has worse performance
 }
 
 if(what == "Hapf20DDecreasCov") {
@@ -135,7 +167,6 @@ if(what == "Hapf20DDecreasCov") {
 		
 	}) # without main effects, the random forest has worse performance
 }
-
 
 if(what == "Hapf11DPoly2") {
 	# Run with 
@@ -190,7 +221,6 @@ if(what == "Hapf11DPoly2") {
 	}) # without main effects, the random forest has worse performance
 }
 
-
 if(what == "Hapf11DExplicitPoly2") {
 	# Run with 
 	#nPts = 300
@@ -244,7 +274,6 @@ if(what == "Hapf11DExplicitPoly2") {
 		
 	}) # without main effects, the random forest has worse performance
 }
-
 
 if(what == "Hapf20DClass") {
 	fileName = paste("Hapf20DClassN", nPts, sep="")
