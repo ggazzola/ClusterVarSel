@@ -113,7 +113,6 @@ if(what == "Hapf20D") {
 	}) # without main effects, the random forest has worse performance
 }
 
-
 if(what == "HapfMixed20D") {
 	fileName = paste("HapfMixed20DN", nPts, "Cov", covVal, "Rsq", desiredRsq, "Pow", corPower, "minNum", minNumPtsPerPart, sep="")
 
@@ -132,6 +131,7 @@ if(what == "HapfMixed20D") {
 		X[,7] = Discretize(X[,7])
 		X[,11] = Discretize(X[,11])
 		X[,13] = Discretize(X[,13])
+		X
 		
 	})
 
@@ -1058,7 +1058,6 @@ if(what == "Leukemia") {
 	})
 }
 
-
 if(what == "Breast2Class") {
 	# n = 77, p = 4870
 	trueModelX = expression({
@@ -1072,7 +1071,6 @@ if(what == "Breast2Class") {
 		Y = as.data.frame(dat[, ncol(dat)])
 	})
 }
-
 
 if(what == "Breast3Class") {
 	# n = 38, p = 3051
