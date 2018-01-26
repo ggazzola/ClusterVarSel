@@ -48,9 +48,9 @@ if(what%in%bigDataSets){
 
 nTree =   1000 #########################
 nPts= 100  ####################### 
-desiredRsq= 0.8 ##############
 minNumPtsPerPart = 4 #############
 covVal = 0.9 ##############
+desiredRsq= 0.8 ##############
 topQuantile = NULL
 pValuePower = 1/20
 corPower = 2 ################
