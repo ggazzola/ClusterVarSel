@@ -10,11 +10,11 @@ logFile = "Log.txt"
 
 for(partRepeat in repeatIdxVect){
 objInEnv = ls()
-objInEnv=objInEnv[objInEnv!="numRepeats" & objInEnv!="partRepeat" & objInEnv!="dirName" & objInEnv!="cnt" & objInEnv!="repeatIdxVect" & objInEnv!="logFile"]
+objInEnv=objInEnv[objInEnv!="numRepeats" & objInEnv!="partRepeat" & objInEnv!="dirName" & objInEnv!="cnt" & objInEnv!="repeatIdxVect" & objInEnv!="logFile" & objInEnv != "dateTmp"]
 rm(list = objInEnv)
 
 ### --- Params declaration starts here --- ###	
-what = "Heart" #Hapf20D, Hapf20DDecreasCov, Hapf20DClass, Hapf11DPoly2, Hapf11DExplicitPoly2, 12DLinear, 24DLinear, Ozone[Num],  Ionosphere,  BostonNoTown, BreastNumNoId, Sonar, Glass, fMRI, brain , srbct, lymphoma, prostate, Parkinsons
+what = "Hapf20D" #Hapf20D, Hapf20DDecreasCov, Hapf20DClass, Hapf11DPoly2, Hapf11DExplicitPoly2, 12DLinear, 24DLinear, Ozone[Num],  Ionosphere,  BostonNoTown, BreastNumNoId, Sonar, Glass, fMRI, brain , srbct, lymphoma, prostate, Parkinsons
 # WHY FOR FMRI NEED MORE STERRORS TO REACH  PERFORMANCE AS GOOD AS, E.G., DIAZ1? SHOULDN'T HAVE TO DO WITH THE WAY SERR IS CALCULATED 
 #	B/C IF USE DEFMTRY SHOULD BE THE SAME AS FOR COMPETING METHODS
 extraNam = "" ###############
@@ -29,7 +29,7 @@ if(what%in%c("fMRI",bigDataSets)){
 	numFolds = 10 ############################ # ignored if leaveOneOut = T
 } else {
 	leaveOneOut = F #################
-	numFolds =  10 
+	numFolds =  10
 }
 
 if(what%in%bigDataSets){
@@ -46,7 +46,7 @@ if(what%in%bigDataSets){
 	numVarAfterWarmStart =  Inf
 }
 
-nTree =  1000 #########################
+nTree =   1000 #########################
 nPts= 100  ####################### 
 desiredRsq= 0.8 ##############
 minNumPtsPerPart = 4 #############
@@ -89,25 +89,23 @@ rFileList = c("CondPermSim.R", "ExtraRFCode.R", "GGGParty.R",
 	} else{
 		onlyReturnName = T
 	}
-	source("CondPermSim.R")
+	source(paste0(dateTmp, "CondPermSim.R"))
+	
 	numFiles = length(grep(fileName, list.files()))
 	if(numFiles!=1){
 			stop("There are ", numFiles, " files named ", fileName)
 	}	
 	filNam = fileName
-
-	if(cnt==1){
+	if(cnt ==1){
 		filNamTmp = filNam
 		filNamTmp = gsub(paste("Rep", repeatIdxVect[1], sep=""), "", filNamTmp)
 		dirName = paste(filNamTmp, dateTmp , sep="")
 		system(paste("mkdir", dirName))
-		for(ff in rFileList)
-			system(paste("mv", paste(dateTmp, ff, sep=""), dirName)) # backing up R code
 	}
 	
 	if("GGG"%in% toDo) {	
-		source("TestMethods.R")
-		system(paste("./ResGGGNew.R", fileName))
+		source(paste0(dateTmp, "TestMethods.R"))
+		system(paste(paste0("./", dateTmp, "ResGGGNew.R"), fileName))
 		cat("GGG methods done\n")
 	} else{
 		cat("Skipping GGG methods\n")
@@ -115,20 +113,24 @@ rFileList = c("CondPermSim.R", "ExtraRFCode.R", "GGGParty.R",
 
 	if("competing" %in% toDo) {
 		rm(competingMethods)
-		source("TestMethods.R")
-		system(paste("./ResGGGNew.R", fileName)) #here fileName contains a 'Compet' suffix
+		source(paste0(dateTmp, "TestMethods.R"))
+		system(paste(paste0("./", dateTmp, "ResGGGNew.R"), fileName)) #here fileName contains a 'Compet' suffix
 		print(paste(filNam, "ALL done"))
 	}
 	system(paste("mv", paste(filNam, "*", sep=""), dirName)) # this will move both GGG and Compet
 	cnt = cnt +1
 }
 
+
 system(paste("mv", logFile, dirName))
+for(ff in rFileList)
+		system(paste("mv", paste(dateTmp, ff, sep=""), dirName)) # backing up R code
+
 whatDir = paste(getwd(), dirName, sep="/")
-system(paste("cp MeanSeOverRepeats.R", dirName))
+
 setwd(whatDir)
 rootFileName = strsplit(fileName, "Rep")[[1]][1]
-system(paste("./MeanSeOverRepeats.R", rootFileName))
+system(paste(paste0("./", dateTmp, "MeanSeOverRepeats.R"), rootFileName))
 print(whatDir)
 cat(paste("Results ready in", whatDir, "\n"))
 
