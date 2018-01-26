@@ -101,6 +101,8 @@ rFileList = c("CondPermSim.R", "ExtraRFCode.R", "GGGParty.R",
 		filNamTmp = gsub(paste("Rep", repeatIdxVect[1], sep=""), "", filNamTmp)
 		dirName = paste(filNamTmp, dateTmp , sep="")
 		system(paste("mkdir", dirName))
+		for(ff in rFileList)
+			system(paste("cp", paste(dateTmp, ff, sep=""), dirName)) # backing up R code
 	}
 	
 	if("GGG"%in% toDo) {	
@@ -124,7 +126,7 @@ rFileList = c("CondPermSim.R", "ExtraRFCode.R", "GGGParty.R",
 
 system(paste("mv", logFile, dirName))
 for(ff in rFileList)
-		system(paste("mv", paste(dateTmp, ff, sep=""), dirName)) # backing up R code
+		system(paste("rm -rf", paste(dateTmp, ff, sep=""), dirName)) # removing useless R code
 
 whatDir = paste(getwd(), dirName, sep="/")
 
