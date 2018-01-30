@@ -1,16 +1,10 @@
 #used to check if the data and corresponding folds generated in different variants of the same simulation match
 
-folderList=c(
-"~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20DN100Cov0.9Rsq0.8Pow2minNum2CART20160123-180044/", 
-"~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20DN100Cov0.9Rsq0.8Pow4minNum4CART20160123-175931/",
-"~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20DN100Cov0.9Rsq0.8Pow1minNum4CART20160123-175903",
-"~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20DN100Cov0.9Rsq0.8Pow0minNum4CART20160123-175834",
-"~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20DN100Cov0.9Rsq0.8Pow0minNum4CART20160123-175834",
-"~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20DN100Cov0.9Rsq0.8Pow2minNum8CART20160123-180115",
-"~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20DN100Cov0.9Rsq0.8Pow2minNum4CART20160127-172643"
-)
+rootFolder ="~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20/Cov0.9Rsq0.8/"
+setwd(rootFolder)
+subFolderList=list.files()
 
-
+folderList = paste0(rootFolder, subFolderList)
 
 cnt1=cnt2=1
 numFolders=length(folderList)
