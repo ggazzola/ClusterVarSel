@@ -1045,6 +1045,20 @@ if(what == "ProteinPL") {
 	})
 }
 
+if(what == "ProteinNumPL") {
+	# n = 215, p = 11 (1 categorical converted to numeric)
+	trueModelX = expression({
+		fileName = "ProteinNumPL"
+		load("ProteinX1NumPL.RData")
+		X= dat[,1:(ncol(dat)-1)]
+
+	}) 
+	
+	trueModelY = expression({
+		Y = as.data.frame(dat[, ncol(dat)])
+	})
+}
+
 if(what == "Leukemia") {
 	# n = 38, p = 3051
 	trueModelX = expression({
