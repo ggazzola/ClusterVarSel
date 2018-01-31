@@ -976,6 +976,7 @@ if(what == "Adenocarcinoma") {
 
 if(what == "Parkinsons") {
 	# 195 x 23
+	# UCI
 	trueModelX = expression({
 		fileName = "Parkinsons"
 		load("Parkinsons.RData")
