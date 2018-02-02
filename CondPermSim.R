@@ -785,7 +785,7 @@ if(what == "OzoneNumNoV9") {
 }
 
 if(what == "OzoneNum") {
-	#n=203 (b/c of missing data -- originally n=366), p=13
+	#n=203 (b/c of missing data -- originally n=366), p=13, regression
 	#3 categorical time variables converted to numeric
 	trueModelX = expression({
 		fileName = "OzoneNum"
@@ -976,7 +976,7 @@ if(what == "Adenocarcinoma") {
 
 if(what == "Parkinsons") {
 	# 195 x 23
-	# UCI
+	# UCI class
 	trueModelX = expression({
 		fileName = "Parkinsons"
 		load("Parkinsons.RData")
@@ -1243,7 +1243,7 @@ if(what == "Heart") {
 }
 
 if(what == "BostonNoTown") {
-	#num 506 x 15
+	#num 506 x 15, regression
 	trueModelX = expression({
 		fileName = "Boston"
 		data(BostonHousing2)

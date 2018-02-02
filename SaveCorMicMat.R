@@ -30,7 +30,7 @@ for(i in fileList){
 			}
 		}	
 	}	
-	save(dat, corMatDatX, micMatDatX, pValMatDatX, file=paste0(savePath, "CorMicPvalMat", i))
+	save(corMatDatX, micMatDatX, pValMatDatX, file=paste0(savePath, "CorMicPvalMat", i))
 	rm(dat, corMatDatX, micMatDatX, pValMatDatX)
 	print(i)
 }

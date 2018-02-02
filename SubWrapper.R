@@ -126,7 +126,7 @@ rFileList = c("CondPermSim.R", "ExtraRFCode.R", "GGGParty.R",
 
 system(paste("mv", logFile, dirName))
 for(ff in rFileList)
-		system(paste("rm -rf", paste(dateTmp, ff, sep=""), dirName)) # removing useless R code
+		system(paste("rm -rf", paste(dateTmp, ff, sep=""))) # removing useless R code
 
 whatDir = paste(getwd(), dirName, sep="/")
 
