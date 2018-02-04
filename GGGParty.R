@@ -460,7 +460,7 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 			if(partNumUnique <=1){
 				cat("Warning: all points assigned to one only cluster\n")
 				clustRes = rep(1, numUniquePts) 
-				break
+				#break
 			}
 		}
 		if(!exists("clustRes", inherits = F)) {
@@ -468,10 +468,10 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 				datXOobForClust = as.matrix(datXOobForClust) # else the matrix multiplication won't work
 				datXOobScaledForClust = scale(datXOobForClust) ### criticism: why not doing [0,1] normalization as done in daisy?
 				datXOobScaledForClust = datXOobForClust%*%scalingMatForClust		
-				clustRes = kmeans(datXOobScaledForClust, partNum, iterMax, nStart)$cluster # before used partNumUnique...
+				clustRes = kmeans(datXOobScaledForClust, partNumUnique, iterMax, nStart)$cluster # before used partNum...
 			} else {								
 				datXOobDist = daisy(datXOobForClust, weights = diag(scalingMatForClust)/sum(diag(scalingMatForClust))) # NEW APRIL 2016 (used to be weights = weightVect)
-				clustRes = pam(datXOobDist, partNum, cluster.only=T)			# normalization by sum seems to solve some numerical problems with raw weights and the daisy function
+				clustRes = pam(datXOobDist, partNumUnique, cluster.only=T)			# normalization by sum seems to solve some numerical problems with raw weights and the daisy function
 																				# causing NAs to be returned in dissimilarity matrix
 																					### note datXOobDist is a dissimilarity matrix, but this dissimilarity is not a metric
 			}
