@@ -423,8 +423,10 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 	# scalingMat New 2016 (used to be weightVect)
 	#input is expected to be a matrix if whichCategorical is not numeric(0)
 	
-	#minNumPtsPerPartLowerBound = 2
-
+	minNumPtsPerPartLowerBound = 2
+	# note: if oob is TRUE for all of the rows of input, we are doing clustering on all data (not only on the "oob")
+	# which is a trick to run ClusterSimple
+	
 	if(!is.null(clusterAssignments)) {
 		clustRes = clusterAssignments[whichOob]	 # cluster assignments of oob only data
 		partNum = max(clusterAssignments)	 # the indices in clusterAssignments are 1, 2, ..., partNum
@@ -447,19 +449,20 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 			numUniquePts = nrow(datXOobForClustUnique)
 			partNum = max(floor(numPts/minNumPtsPerPart),1) ## in case there are fewer than minNumPtsPerPart oob points, we make sure there is at least 1 cluster
 			if(partNum>numUniquePts) {
-				partNum = numUniquePts 
+				partNum = numUniquePts # partNum is currently disregarded, in favor of partNumUnique (which coincides with partNum if numUniquePts=numPts)
 			}
 		}
 		#partNumUnique = 0		
 		#while(partNumUnique==0){
-		#	partNumUnique = floor(numUniquePts/minNumPtsPerPart)
-		#	minNumPtsPerPart = minNumPtsPerPart-1 ### why -1?????????
-		#	if(minNumPtsPerPart<minNumPtsPerPartLowerBound){
-		#		cat("Warning: all points assigned to one only cluster\n")
-		#		clustRes = rep(1, numUniquePts) # all points assigned to one cluster if we cannot have at least 2 obs per cluster (assuming clusters of same size)
-		#		break
-		#	}
-		#}
+			partNumUnique = floor(numUniquePts/minNumPtsPerPart) # number of clusters of unique points (could be 1 or even 0)
+		#	minNumPtsPerPart = minNumPtsPerPart-1 # decreasing by one in case we go to the next while iteration, which means that we don't have enough points to allow a cluster set with the current minNumPtsPerPart number of points in each cluster, which means we need to decrease minNumPtsPerPart and try again to see if that smaller value works
+		#	if((minNumPtsPerPart<minNumPtsPerPartLowerBound) | partNumUnique ==1){ # all points assigned to one cluster if we cannot have at least 2 obs per cluster (assuming clusters of same size)
+			if(partNumUnique <=1){
+				cat("Warning: all points assigned to one only cluster\n")
+				clustRes = rep(1, numUniquePts) 
+				break
+			}
+		}
 		if(!exists("clustRes", inherits = F)) {
 			if(length(whichCategoricalForClust)==0) {
 				datXOobForClust = as.matrix(datXOobForClust) # else the matrix multiplication won't work
