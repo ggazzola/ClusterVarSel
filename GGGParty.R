@@ -462,7 +462,7 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 				clustRes = rep(1, numUniquePts) 
 				#break
 			}
-		}
+		#}
 		if(!exists("clustRes", inherits = F)) {
 			if(length(whichCategoricalForClust)==0) {
 				datXOobForClust = as.matrix(datXOobForClust) # else the matrix multiplication won't work
