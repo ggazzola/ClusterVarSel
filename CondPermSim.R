@@ -1503,7 +1503,7 @@ if(!onlyReturnName) {
 												# alsom, need to calculate all different variants of importance above on these RFs
 						# pointless to retrain the same model if no cross validation is performed, i.e., if defaultMtry==T
 						if(meth=="StroblRec" | (meth=="StroblNonRec" & pSub==p)){
-							RF = TrainForest(dat, RFMtry, nTree, forestType, corr.threshold=-0.1, maxLevel=floor(log2(0.368*nPts/minNumPtsPerPart))
+							RF = TrainForest(dat, RFMtry, nTree, forestType, corr.threshold=-0.1, maxLevel=floor(log2(0.368*nPts/minNumPtsPerPart)))
 						} else{
 							RF = TrainForest(dat, RFMtry, nTree, forestType)  ### Jul 19: is this gonna work? cfr xVarIdx below
 						}

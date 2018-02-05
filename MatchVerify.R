@@ -1,6 +1,6 @@
 #used to check if the data and corresponding folds generated in different variants of the same simulation match
 
-rootFolder ="~/Desktop/AllDesktop/Stuff/Rutcor/Research/VariableImportance/Experiments/Results/Results2018/Hapf20/Cov0.9Rsq0.8/"
+rootFolder ="~/Desktop/Compare/"
 setwd(rootFolder)
 subFolderList=list.files()
 
