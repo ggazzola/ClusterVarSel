@@ -126,6 +126,7 @@ if(what == "HapfMixed20D") {
 		diag(Cov)[] <- 1
 		X = mvrnorm(nPts, rep(0, nrow(Cov)), Sigma = Cov)
 		XBack = as.matrix(X)
+		X = as.data.frame(X)
 		X[,1] = Discretize(X[,1])
 		X[,4] = Discretize(X[,4])
 		X[,7] = Discretize(X[,7])

@@ -1,6 +1,6 @@
 #used to check if the data and corresponding folds generated in different variants of the same simulation match
 
-rootFolder ="~/Desktop/Compare/"
+rootFolder ="~/Desktop/Boston/"
 setwd(rootFolder)
 subFolderList=list.files()
 
@@ -23,7 +23,7 @@ for(j in 1:20){
 		load(toLoad)
 		datAll2 = datAll
 		inIdxList2 = inIdxList
-		if(sum(datAll1)!=sum(datAll2))
+		if(sum(as.numeric(as.matrix(datAll1)))!=sum(as.numeric(as.matrix(datAll2))))
 			cat("datAll mismatch with", folderList[i], "\n")
 		
 		for(k in 1:length(inIdxList1)){

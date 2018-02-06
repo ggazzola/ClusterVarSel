@@ -429,11 +429,11 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 	
 	if(!is.null(clusterAssignments)) {
 		clustRes = clusterAssignments[whichOob]	 # cluster assignments of oob only data
-		partNum = max(clusterAssignments)	 # the indices in clusterAssignments are 1, 2, ..., partNum
+		partNumUnique = max(clusterAssignments)	 # the indices in clusterAssignments are 1, 2, ..., partNum
 	} else{
 		
 		if(sum(oob)==1){
-			partNum=1
+			partNumUnique=1
 			clustRes = 1 # this is a workaround for the unlikely case in which there is only one oob point
 		} else{								
 			condVarsLogical = colnames(input)%in%cond
@@ -447,21 +447,22 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 			datXOobForClustUnique = unique(datXOobForClust)
 			numPts = nrow(datXOob)
 			numUniquePts = nrow(datXOobForClustUnique)
-			partNum = max(floor(numPts/minNumPtsPerPart),1) ## in case there are fewer than minNumPtsPerPart oob points, we make sure there is at least 1 cluster
-			if(partNum>numUniquePts) {
-				partNum = numUniquePts # partNum is currently disregarded, in favor of partNumUnique (which coincides with partNum if numUniquePts=numPts)
+			#partNum = max(floor(numPts/minNumPtsPerPart),1) ## in case there are fewer than minNumPtsPerPart oob points, we make sure there is at least 1 cluster
+			#if(partNum>numUniquePts) {
+			#	partNum = numUniquePts # partNum is currently disregarded, in favor of partNumUnique (which coincides with partNum if numUniquePts=numPts)
+			#}
+			partNumUnique = floor(numUniquePts/minNumPtsPerPart) # number of clusters of unique points (could be 1 or even 0)
+			if(partNumUnique <=1){
+				cat("Warning: all points assigned to one only cluster\n")
+				clustRes = rep(1, numPts)  # not numUniquePts because we need to assign ALL points (which may be more than numUniquePts)
+				partNumUnique = 1 # in case it's zero, since in that case we put all points in 1 cluster
 			}
 		}
 		#partNumUnique = 0		
 		#while(partNumUnique==0){
-			partNumUnique = floor(numUniquePts/minNumPtsPerPart) # number of clusters of unique points (could be 1 or even 0)
 		#	minNumPtsPerPart = minNumPtsPerPart-1 # decreasing by one in case we go to the next while iteration, which means that we don't have enough points to allow a cluster set with the current minNumPtsPerPart number of points in each cluster, which means we need to decrease minNumPtsPerPart and try again to see if that smaller value works
 		#	if((minNumPtsPerPart<minNumPtsPerPartLowerBound) | partNumUnique ==1){ # all points assigned to one cluster if we cannot have at least 2 obs per cluster (assuming clusters of same size)
-			if(partNumUnique <=1){
-				cat("Warning: all points assigned to one only cluster\n")
-				clustRes = rep(1, numUniquePts) 
-				#break
-			}
+			
 		#}
 		if(!exists("clustRes", inherits = F)) {
 			if(length(whichCategoricalForClust)==0) {
@@ -481,7 +482,7 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 	
 	if(!onlyReturnClusterAssignments) {
 		perm <- 1:nrow(input)
-		for (i in 1:partNum) {
+		for (i in 1:partNumUnique) { # before used partNum
 			index = whichOob[clustRes==i]
 			indexNum = length(index)
 			if (indexNum > 1) {
@@ -570,7 +571,7 @@ conditional_permGGG <- function(cond, xnames, input, tree, oob)  #cond is vector
 		res=list()#GGG
 		res$perm = perm#GGG
 		res$OobIdxPart = NULL#GGG
-		res$partNum = 0#GGG
+		res$partNumUnique = 0#GGG
 		return(res)#GGG
 	} else {
 		blocks <- as.data.frame(blocks)
@@ -594,7 +595,7 @@ conditional_permGGG <- function(cond, xnames, input, tree, oob)  #cond is vector
 		}
 		res=list()#GGG
 		res$perm = perm[oob]#GGG
-		######  res$partNum = cnt#GGG
+		######  res$partNumUnique = cnt#GGG
  		######  res$OobIdxPart = oobPointByPart#GGG list of oob point partitions (as many as the total number of combinations of cutpoints from all conditioning variables)		###GGGTemp
 		######   cutPointList = list() #GGG###GGGTemp
 		######for(k in 1:length(blocks)){#GGG # not cond, because it could be that a certain "correlated" variable doesn't show up in the tree###GGGTemp
