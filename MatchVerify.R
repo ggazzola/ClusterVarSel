@@ -1,6 +1,6 @@
 #used to check if the data and corresponding folds generated in different variants of the same simulation match
 
-rootFolder ="~/Desktop/Boston/"
+rootFolder ="~/Desktop/Bla/"
 setwd(rootFolder)
 subFolderList=list.files()
 

@@ -486,6 +486,7 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 			index = whichOob[clustRes==i]
 			indexNum = length(index)
 			if (indexNum > 1) {
+				# if current cluster has more than one point...
 				perm[index] = index[sample.int(indexNum, indexNum, F, NULL)]  # NEW APRIL 2016
 				#perm[index] <- sample(index) #permuting within the current cluster
 			}	
