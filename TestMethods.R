@@ -58,7 +58,7 @@ for(j in 1:length(methodVect)) {
 			datXOut = datOut[, colnames(datOut)!="Y"]
 			datYOut = datOut$Y
 			
-			cntNAP = cntDiaz = cntDiazRecomp = cntGen = 1 # this needs to happen at the beginning of every fold
+			cntNAP = cntDiaz = cntGRF = cntDiazRecomp = cntGen = 1 # this needs to happen at the beginning of every fold
 			if(competingMethods){
 				ptm <- proc.time()
 				
@@ -124,6 +124,24 @@ for(j in 1:length(methodVect)) {
 					cntGen = cntGen+1
 					
 				}
+				
+				if(methodVect[j]=="BorutaGGG") {
+					resBoruta  = BorutaGGG(datYIn, datXIn, ntree=nTree)
+					variablesInSelected = resGRF$selection
+				}
+				
+				if(methodVect[j]=="GRF" | methodVect[j]=="GRRF") {
+					if(cntGRF==1) {
+						resGRF  = GRFGGG(datYIn, datXIn, ntree=nTree)
+					}
+					if(methodVect[j]=="GRF"){
+						variablesInSelected = resGRF$selectionGRF
+					} else{
+						variablesInSelected = resGRRF$selectionGRRF
+					}
+					cntGRF = cntGRF+1
+				}
+				
 				ptm = round((proc.time() - ptm)/60)
 				mess = paste("The computation of", methodVect[j], "in fold", i, "took", unname(summary(ptm)[3]), "minutes\n")
 				system(paste("echo \"", mess, "\">>", logFile))

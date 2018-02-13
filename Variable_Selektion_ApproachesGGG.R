@@ -440,6 +440,64 @@ GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, type="rand
              "oob.error.int" = oob.error.int, "oob.error.pred" = oob.error.pred))
 }
 
+BorutaGGG = function(Y, X, ntree=1000) {
+	if("package:randomForest" %in% search())
+		detach("package:randomForest", unload=TRUE)
+		
+	if("package:extendedForest" %in% search())
+		detach("package:extendedForest", unload=TRUE)
+		
+	if("package:RRF" %in% search())
+		detach("package:RRF", unload=TRUE)	
+		
+	suppressWarnings(suppressMessages(require(Boruta)))
+	cat("Loading Boruta\n")
+	
+	if(includeSeed){
+		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
+		set.seed(seedVal)
+	}	
+	boruta.train <- Boruta(X, Y, holdHistory=F)
+	selection = which(boruta.train$finalDecision=="Confirmed")
+	if(length(selection)==0)
+		selection = NULL
+	return(list("selection" = selection))
+}
+
+GRFGGG = function(Y, X, ntree=1000, gamma=1) {
+	if("package:randomForest" %in% search())
+		detach("package:randomForest", unload=TRUE)
+		
+	if("package:extendedForest" %in% search())
+		detach("package:extendedForest", unload=TRUE)
+		
+	if("package:Boruta" %in% search())
+		detach("package:Boruta", unload=TRUE)	
+		
+	suppressWarnings(suppressMessages(require(RRF)))
+	cat("Loading RRF\n")
+
+	mtry = ChooseMtry(ncol(X),Y)
+	if(includeSeed){
+		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
+		set.seed(seedVal)
+	}	
+	RF <- RRF(X, Y, flagReg=0, ntree=ntree, mtry=mtry)
+	imp <- RF$importance[,1] # could be gini or purity, depending on class vs regr
+	impRF <- imp/max(imp)
+	coefReg <- (1-gamma) + gamma*impRF
+	grf <- RRF(X, Y, flagReg=0, coefReg=coefReg)
+	selectionGRF = grf$feaSet
+	if(length(selectionGRF)==0)
+		selectionGRF = NULL
+	grrf <- RRF(X,as.factor(class), flagReg=1, coefReg=coefReg)	
+	selectionGRRF = grrf$feaSet
+	if(length(selectionGRRF)==0)
+		selectionGRRF = NULL
+	
+	return(list("selectionGRF" = selectionGRF, "selectionGRRF" = selectionGRRF))
+}
+
 
 if(F){
 	#load("brain.RData")
