@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if (( $# < 1 || $# > 2 )); then 
+	echo "Error: Specify one or two arguments, e.g. 1:20 or testagain or testagain competing"
+	exit 1
+fi
+
 alreadyWrittenLineSubWrapper=`cat SubWrapper.R | grep "Rscript" | wc -l`
 alreadyWrittenLineResGGGNew=`cat ResGGGNew.R | grep "Rscript" | wc -l`
 alreadyWrittenLineTestAgain=`cat TestAgain.R | grep "Rscript" | wc -l`
@@ -28,10 +33,7 @@ if (( $alreadyWrittenLineTestAgain == 1 )); then
 fi
 
 
-if [ $# != 1 ]; then 
-	echo "Error: Specify one argument, e.g. 1:20"
-	exit 1
-fi
+
 
 if [ $(hostname) == "khachiyan.rutcor.rutgers.edu" ]; then
 	firstLine=\#\!/home/ggazzola/R-3.2.1/bin/Rscript
@@ -49,5 +51,8 @@ for fileToChange in SubWrapper.R ResGGGNew.R TestAgain.R; do
 done
 
 
-./SubWrapper.R $1
-
+if [ $1 == "testagain" ]; then
+	./TestAgain.R $2
+else
+	./SubWrapper.R $1
+fi

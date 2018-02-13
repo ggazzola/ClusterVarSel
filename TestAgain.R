@@ -7,6 +7,14 @@ if (length(inputVals)>1 ) {
 require(randomForest)
 source("ExtraRFCode.R")
 
+logFile = "Log.txt"
+dateTmp = system('date +%Y%m%d-%H%M%S', intern=T)
+logFile = paste(dateTmp, logFile, sep="")
+system(paste("touch", logFile))
+
+defaultMtry = T
+cat("WARNING: SETTING defaultMtry = T")
+
 fileList = list.files()
 for(currFile in fileList[grep("SelVar", fileList)]){
 	fileNameFinal = currFile
