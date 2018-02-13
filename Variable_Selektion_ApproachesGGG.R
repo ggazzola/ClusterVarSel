@@ -486,7 +486,6 @@ GRFGGG = function(Y, X, ntree=1000, gamma=1) {
 	return(list("selectionGRF" = selectionGRF, "selectionGRRF" = selectionGRRF))
 }
 
-
 if(F){
 	#load("brain.RData")
 	#X = dat[,1:ncol(dat)]

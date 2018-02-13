@@ -29,7 +29,7 @@ if(competingMethods) {
 	source("Variable_Selektion_ApproachesGGG.R")
 	#source("ForwardSelect.R")
 	stdErrNumVect = "notRelevant"
-	methodVect = c("Nap",  "NapB", "Alt", "Diaz", "Diaz1", "DiazRecomp", "DiazRecomp1", "Svt", "GenP", "GenI")
+	methodVect = c("Nap",  "NapB", "Alt", "Diaz", "Diaz1", "DiazRecomp", "DiazRecomp1", "Svt", "GenP", "GenI", "Boruta", "GRF", "GRRF")
 	#methodVect = c("Diaz", "Diaz1") # supposedly, these will be more parsimonious
 	
 	numFolds = length(resSim)
