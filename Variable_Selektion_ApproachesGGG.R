@@ -441,14 +441,6 @@ GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, type="rand
 }
 
 BorutaGGG = function(Y, X, ntree=1000) {
-	if("package:randomForest" %in% search())
-		detach("package:randomForest", unload=TRUE)
-		
-	if("package:extendedForest" %in% search())
-		detach("package:extendedForest", unload=TRUE)
-		
-	if("package:RRF" %in% search())
-		detach("package:RRF", unload=TRUE)	
 		
 	suppressWarnings(suppressMessages(require(Boruta)))
 	cat("Loading Boruta\n")
@@ -462,18 +454,12 @@ BorutaGGG = function(Y, X, ntree=1000) {
 	if(length(selection)==0)
 		selection = NULL
 	return(list("selection" = selection))
+	detach("package:Boruta", unload=TRUE)	
+		
 }
 
 GRFGGG = function(Y, X, ntree=1000, gamma=1) {
-	if("package:randomForest" %in% search())
-		detach("package:randomForest", unload=TRUE)
-		
-	if("package:extendedForest" %in% search())
-		detach("package:extendedForest", unload=TRUE)
-		
-	if("package:Boruta" %in% search())
-		detach("package:Boruta", unload=TRUE)	
-		
+	
 	suppressWarnings(suppressMessages(require(RRF)))
 	cat("Loading RRF\n")
 
@@ -494,6 +480,8 @@ GRFGGG = function(Y, X, ntree=1000, gamma=1) {
 	selectionGRRF = grrf$feaSet
 	if(length(selectionGRRF)==0)
 		selectionGRRF = NULL
+	
+	detach("package:Boruta", unload=TRUE)	
 	
 	return(list("selectionGRF" = selectionGRF, "selectionGRRF" = selectionGRRF))
 }
