@@ -125,9 +125,9 @@ for(j in 1:length(methodVect)) {
 					
 				}
 				
-				if(methodVect[j]=="BorutaGGG") {
+				if(methodVect[j]=="Boruta") {
 					resBoruta  = BorutaGGG(datYIn, datXIn, ntree=nTree)
-					variablesInSelected = resGRF$selection
+					variablesInSelected = resBoruta$selection
 				}
 				
 				if(methodVect[j]=="GRF" | methodVect[j]=="GRRF") {

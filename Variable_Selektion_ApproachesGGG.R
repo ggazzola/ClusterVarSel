@@ -450,7 +450,7 @@ BorutaGGG = function(Y, X, ntree=1000) {
 		set.seed(seedVal)
 	}	
 	boruta.train <- Boruta(X, Y, holdHistory=F)
-	selection = which(boruta.train$finalDecision=="Confirmed")
+	selection = colnames(X)[which(boruta.train$finalDecision=="Confirmed")]
 	if(length(selection)==0)
 		selection = NULL
 	return(list("selection" = selection))
@@ -473,11 +473,11 @@ GRFGGG = function(Y, X, ntree=1000, gamma=1) {
 	impRF <- imp/max(imp)
 	coefReg <- (1-gamma) + gamma*impRF
 	grf <- RRF(X, Y, flagReg=0, coefReg=coefReg)
-	selectionGRF = grf$feaSet
+	selectionGRF = colnames(X)[grf$feaSet]
 	if(length(selectionGRF)==0)
 		selectionGRF = NULL
 	grrf <- RRF(X,as.factor(class), flagReg=1, coefReg=coefReg)	
-	selectionGRRF = grrf$feaSet
+	selectionGRRF = colnames(X)[grrf$feaSet]
 	if(length(selectionGRRF)==0)
 		selectionGRRF = NULL
 	
