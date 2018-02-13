@@ -476,7 +476,7 @@ GRFGGG = function(Y, X, ntree=1000, gamma=1) {
 	selectionGRF = colnames(X)[grf$feaSet]
 	if(length(selectionGRF)==0)
 		selectionGRF = NULL
-	grrf <- RRF(X,as.factor(class), flagReg=1, coefReg=coefReg)	
+	grrf <- RRF(X,Y, flagReg=1, coefReg=coefReg)	
 	selectionGRRF = colnames(X)[grrf$feaSet]
 	if(length(selectionGRRF)==0)
 		selectionGRRF = NULL
