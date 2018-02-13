@@ -91,9 +91,11 @@ rFileList = c("CondPermSim.R", "ExtraRFCode.R", "GGGParty.R",
 	}
 	source(paste0(dateTmp, "CondPermSim.R"))
 	
-	numFiles = length(grep(fileName, list.files()))
+	#numFiles = length(grep(fileName, list.files()))
+	
+	numFiles=as.numeric(system(paste("ls", paste0(fileName, "*SelVar.RData"), "| wc -l | xargs"), intern=T))
 	if(numFiles!=1){
-			stop("There are ", numFiles, " files named ", fileName)
+		stop("There are ", numFiles, " files named ", fileName)
 	}	
 	filNam = fileName
 	if(cnt ==1){
