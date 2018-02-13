@@ -137,7 +137,7 @@ for(j in 1:length(methodVect)) {
 					if(methodVect[j]=="GRF"){
 						variablesInSelected = resGRF$selectionGRF
 					} else{
-						variablesInSelected = resGRRF$selectionGRRF
+						variablesInSelected = resGRF$selectionGRRF
 					}
 					cntGRF = cntGRF+1
 				}

@@ -481,7 +481,7 @@ GRFGGG = function(Y, X, ntree=1000, gamma=1) {
 	if(length(selectionGRRF)==0)
 		selectionGRRF = NULL
 	
-	detach("package:Boruta", unload=TRUE)	
+	detach("package:RRF", unload=TRUE)	
 	
 	return(list("selectionGRF" = selectionGRF, "selectionGRRF" = selectionGRRF))
 }
