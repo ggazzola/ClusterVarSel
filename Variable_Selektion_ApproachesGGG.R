@@ -458,7 +458,7 @@ BorutaGGG = function(Y, X, ntree=1000) {
 		
 }
 
-GRFGGG = function(Y, X, ntree=1000, gamma=1) {
+GRFGGG = function(Y, X, ntree=1000, gammaGRF=1, gammaGRRF=0.5) {
 	
 	suppressWarnings(suppressMessages(require(RRF)))
 	cat("Loading RRF\n")
@@ -468,16 +468,19 @@ GRFGGG = function(Y, X, ntree=1000, gamma=1) {
 		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
 		set.seed(seedVal)
 	}	
-	RF <- RRF(X, Y, flagReg=0, ntree=ntree, mtry=mtry)
+	RF <- RRF(X, Y, flagReg=0, ntree=ntree, mtry=mtry) # standard RF
 	imp <- RF$importance[,1] # could be gini or purity, depending on class vs regr
 	impRF <- imp/max(imp)
-	coefReg <- (1-gamma) + gamma*impRF
-	grf <- RRF(X, Y, flagReg=0, coefReg=coefReg)
-	selectionGRF = colnames(X)[grf$feaSet]
+	
+	coefRegGRF <- (1-gammaGRF) + gammaGRF*impRF
+	grf <- RRF(X, Y, flagReg=0, ntree=ntree, mtry=mtry, coefReg=coefRegGRF) #guided random RF 
+	selectionGRF = colnames(X)[grf$feaSet] # --> training on this, gives GRF-RF
 	if(length(selectionGRF)==0)
 		selectionGRF = NULL
-	grrf <- RRF(X,Y, flagReg=1, coefReg=coefReg)	
-	selectionGRRF = colnames(X)[grrf$feaSet]
+	
+	coefRegGRRF <- (1-gammaGRRF) + gammaGRRF*impRF
+	grrf <- RRF(X,Y, flagReg=1, ntree=ntree, mtry=mtry, coefReg=coefRegGRRF) #guided regularized RF	
+	selectionGRRF = colnames(X)[grrf$feaSet] # training on this, gives GRRF-RF
 	if(length(selectionGRRF)==0)
 		selectionGRRF = NULL
 	

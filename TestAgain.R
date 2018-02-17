@@ -13,7 +13,7 @@ logFile = paste(dateTmp, logFile, sep="")
 system(paste("touch", logFile))
 
 defaultMtry = T
-cat("WARNING: SETTING defaultMtry = T")
+cat("WARNING: SETTING defaultMtry = T\n") # this variable is not defined in *SelVar.RData..
 
 fileList = list.files()
 for(currFile in fileList[grep("SelVar", fileList)]){
