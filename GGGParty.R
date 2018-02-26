@@ -471,7 +471,7 @@ conditional_permClusterGGG <- function(cond, xnames, input,  oob, whichOob, scal
 				datXOobScaledForClust = datXOobForClust%*%scalingMatForClust		
 				clustRes = kmeans(datXOobScaledForClust, partNumUnique, iterMax, nStart)$cluster # before used partNum...
 			} else {								
-				datXOobDist = daisy(datXOobForClust, weights = diag(scalingMatForClust)/sum(diag(scalingMatForClust))) # NEW APRIL 2016 (used to be weights = weightVect)
+				datXOobDist = daisy(datXOobForClust, weights = diag(scalingMatForClust)/sum(diag(scalingMatForClust))) # NEW APRIL 2016 (used to be weights = weightVect) # this calls gower distance (no need to pre-scale, b/c distance between values along any variable is in [0,1])
 				clustRes = pam(datXOobDist, partNumUnique, cluster.only=T)			# normalization by sum seems to solve some numerical problems with raw weights and the daisy function
 																				# causing NAs to be returned in dissimilarity matrix
 																					### note datXOobDist is a dissimilarity matrix, but this dissimilarity is not a metric
