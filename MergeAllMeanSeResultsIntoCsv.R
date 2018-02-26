@@ -14,7 +14,7 @@ if(existsGGG){
 	nameSim = strsplit(fileList[whichGGGMean], "MeanGGG")[[1]][1] 
 	gggMean = read.csv(fileList[whichGGGMean])
 	gggSe = read.csv(fileList[whichGGGSe])
-	fact = abs(1/median(compMean$perfMean))
+	fact = abs(1/median(gggMean$perfMean))
 	if(fact>1000)
 		multiply = T
 } else {
@@ -37,6 +37,12 @@ if(existsComp){
 	compMean = compSe = NULL
 	cat("No Comp files\n")
 }
+
+if(is.null(gggMean) & is.null(compMean)){
+	stop(getwd(), " NOTHING AVAILABLE\n")
+}	
+
+cat("PROCESSING", nameSim, "\n")
 
 newMeanMat = rbind(gggMean, compMean)
 newSeMat = rbind(gggSe , compSe)
@@ -91,12 +97,19 @@ if(length(whichStdCPI)>0){
 	#"\\bs{\\bar{e}}",  "\\bs{\\tilde{e}}",  "\\bs{\\bar{e}_s}")
 colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\\mathcal{v}^*}}", "\\bs{\\bar{e}^*}")
 
-for(i in 1:nrow(newMeanMat))
-	for(j in 2:ncol(newMeanMat))
+for(i in 1:nrow(newMeanMat)){
+	for(j in 2:ncol(newMeanMat)){
 		newMeanMat[i, j] = paste(abs(round(as.numeric(newMeanMat[i,j]), 3)), abs(round(as.numeric(newSeMat[i,j]), 3)), sep="\\pm")
+	}
+	
+	currMeth = newMeanMat[i,1] 
+	currMeth = paste0("\\text{\\textsf{", currMeth, "}}")
+	newMeanMat[i,1]  = currMeth
+}	
 
 write.csv(newMeanMat, file=paste(nameSim, "MergedMeanSe.csv", sep=""), quote=F, row.names=F)
 
+cat(nameSim, "DONE \n")
 
 
 
