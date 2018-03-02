@@ -61,7 +61,7 @@ NAPGGG <- function(Y, X, nperm = 400, ntree = 100, alpha = 0.05, type="randomFor
       perm.forest = TrainForest(perm.dat, mtry, ntree, type)
 	#perm.mat[i, j] <- varimp(perm.forest, pre1.0_0 = T)[j]}} # recompute the importances
 	perm.mat[i, j] = Importance(perm.forest, type)[j]}
-	if(cnt%%250==0 | j==length(selection))
+	if(cnt%%100==0 | j==length(selection))
 		cat("NAP:", j, "out of", length(selection), "variables done\n")
 	}
   p.vals <- sapply(selection, function(x) sum(perm.mat[, x] # compute p-values
@@ -232,7 +232,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest") {
 	# define the next set of variables
 		if (recompute == F & i > 1) selections[[i - 1]] <- selections[[i]][-i]
 		if (recompute == T & i > 1) selections[[i - 1]] <- names(sort(Importance(forest, type), decreasing = T))[-i]
-		if(i%%250==0)
+		if(i%%100==0)
 			cat("Diaz:", ncol(X)-i+1, "out of", ncol(X), "variables done\n")
 	}
 	# compute the error expected when no predictor is used at all
@@ -272,13 +272,14 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest") {
 ########################
 ### The SVT approach ###
 ########################
-SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, type="randomForest") {
+SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, allVariables = T, type="randomForest") {
 	# defaults as in papers -- for ntree they are not too specific, but certainly >=1000
   # Y: response vector
   # X: matrix or data frame containing the predictors
   # ntree: number of trees contained in a forest
   # folds: determines 'folds'-fold cross validation
-  # repetitions: the results of 'repetitons' repetitons should be aggregated
+  # repetitions: the results of 'repetitions' repetitions should be aggregated
+  # allVariables: set to T to eliminate one variable at a time, set to F to eliminate half of the variables at a time
   # RETURNS: selected variables, a corresponding forest and OOB-error      
   #mtry <- ceiling(sqrt(ncol(X))) # automatically set mtry to sqrt(p)
 	mtry = ChooseMtry(ncol(X),Y)
@@ -314,23 +315,37 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, type="random
 
       #selection <- names(sort(varimp(forest, pre1.0_0 = T), decreasing = T))
       selection <- names(sort(Importance(forest, type), decreasing = T))
-      for (i in ncol(X):1) { # do backward rejection steps
-        #mtry <- min(mtry, ceiling(sqrt(i)))
-		mtry = min(mtry, ChooseMtry(i,Y))
+	  if(allVariables){
+	  	for (i in ncol(X):1) {
+	  		mtry = min(mtry, ChooseMtry(i,Y))
 
-        #forest <- cforest(as.formula(paste("response", paste(selection[1:i], 
-         #                 collapse = " + "), sep = " ~ ")), data = train, 
-          #                controls = cforest_unbiased(mtry = mtry, ntree = ntree))
-		if(includeSeed){
-			seedVal = sum(as.numeric(gsub("X", "", selection[1:i])))
-			set.seed(seedVal) 
-		}	
-		forest = TrainForest(train, mtry, ntree, type, selection[1:i])
-        #errors[x, i + 1, k] <- mean((as.numeric(as.character(test$response)) - 
-         #          as.numeric(as.character(predict(forest, newdata = test))))^2)}
-		errors[x, i + 1, k] = Error(forest, test$Y, selection[1:i], newdata = test[,selection[1:i], drop=F])}		
+	  		if(includeSeed){
+	  			seedVal = sum(as.numeric(gsub("X", "", selection[1:i])))
+	  			set.seed(seedVal) 
+	  		}	
+	  		forest = TrainForest(train, mtry, ntree, type, selection[1:i])
+
+	  		errors[x, i + 1, k] = Error(forest, test$Y, selection[1:i], newdata = test[,selection[1:i], drop=F])
+	  	}
+	  } else{
+	  	varNum = ncol(X)
+	  	while(varNum>0){
+	  		mtry = min(mtry, ChooseMtry(varNum,Y))
+
+	  		if(includeSeed){
+	  			seedVal = sum(as.numeric(gsub("X", "", selection[1:varNum])))
+	  			set.seed(seedVal) 
+	  		}	
+	  		forest = TrainForest(train, mtry, ntree, type, selection[1:varNum])
+
+	  		errors[x, varNum + 1, k] = Error(forest, test$Y, selection[1:varNum], newdata = test[,selection[1:varNum], drop=F])
+	  		varNum = round(varNum/2)
+	  	}
+	
+	  }	
       errors[x, 1, k] <- Inf}
-	  if(x%%10==0)
+	  
+	  if(x%%2==0)
 		cat("SVT:", x, "out of", repetitions, "repetitions done\n")
 	} #mean((as.numeric(as.character(test$response)) - 
                      #ifelse(all(Y %in% 0:1), round(mean(as.numeric(
@@ -389,7 +404,7 @@ GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, type="rand
 			forest = TrainForest(dat, mtry, ntree, type, selectionNames = selection[1:i])
 			errors[j, i + 1] = Error(forest, Y, selection[1:i])
 		}
-		if(i%%250 ==0 | i==ncol(X))
+		if(i%%100 ==0 | i==ncol(X))
 			cat("Gen:", i, "out of", ncol(X), "variables done\n")	
 	}	
  	errors[, 1] <- Inf#mean((as.numeric(as.character(Y)) - # error with no predictors
@@ -493,7 +508,7 @@ if(F){
 	#load("brain.RData")
 	#X = dat[,1:ncol(dat)]
 	#Y = dat$Y
-	X = matrix(rnorm(250), nrow=50)
+	X = matrix(rnorm(100), nrow=50)
 	Y = apply(X, 1, sum)
 	resNAPGGG = NAPGGG(Y, X, ntree=50, nperm=50)
 

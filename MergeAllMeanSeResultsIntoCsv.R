@@ -95,7 +95,7 @@ if(length(whichStdCPI)>0){
 
 #colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\mathcal{v}}}", "\\bs{\\tilde{\mathcal{v}}}", "\\bs{\\bar{\mathcal{v}}_s}", 
 	#"\\bs{\\bar{e}}",  "\\bs{\\tilde{e}}",  "\\bs{\\bar{e}_s}")
-colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\\mathcal{v}^*}}", "\\bs{\\bar{e}^*}")
+colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\\mathcal{v}}^*}", "\\bs{\\bar{e}^*}")
 
 for(i in 1:nrow(newMeanMat)){
 	for(j in 2:ncol(newMeanMat)){

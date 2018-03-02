@@ -1088,7 +1088,7 @@ if(what == "Breast2Class") {
 }
 
 if(what == "Breast3Class") {
-	# n = 38, p = 3051
+	# n = 95, p = 4870
 	trueModelX = expression({
 		fileName = "Breast3Class"
 		load("Breast3Class.RData")
