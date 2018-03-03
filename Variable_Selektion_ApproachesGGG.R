@@ -373,7 +373,7 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, allVariables
 ##################################
 ### The G.i and G.p approaches ###
 ##################################
-GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, type="randomForest"){
+GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, innerRepetitionsGGG = 50, type="randomForest"){
 	# defaults as in paper
 	### GGG In paper, they use se.rule = 0
   # Y: response vector
@@ -399,7 +399,7 @@ GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, type="rand
 	errors <- matrix(NA, nrow = repetitions, ncol = ncol(X) + 1)
  	for (i in 1:ncol(X)) { # do forward selection steps based on the ranking ### GGG actually, equivalent to to this backwards, since the order is the same, just mirrored
 		mtry = min(mtry, ChooseMtry(i,Y))
- 		for (j in 1:repetitions) { 
+ 		for (j in 1:innerRepetitionsGGG) { 
 			### GGG not setting seed here, else it's pointless to repeat
 			forest = TrainForest(dat, mtry, ntree, type, selectionNames = selection[1:i])
 			errors[j, i + 1] = Error(forest, Y, selection[1:i])
