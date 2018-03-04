@@ -396,7 +396,7 @@ GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, innerRepet
  		rankings[i, ] <- Importance(forest, type)
 	} ### GGG rank multiple times, then compute average and sort variables based on it
 		selection <- names(sort(colMeans(rankings), decreasing = T))
-	errors <- matrix(NA, nrow = repetitions, ncol = ncol(X) + 1)
+	errors <- matrix(NA, nrow = innerRepetitionsGGG, ncol = ncol(X) + 1)
  	for (i in 1:ncol(X)) { # do forward selection steps based on the ranking ### GGG actually, equivalent to to this backwards, since the order is the same, just mirrored
 		mtry = min(mtry, ChooseMtry(i,Y))
  		for (j in 1:innerRepetitionsGGG) { 
@@ -410,7 +410,7 @@ GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, innerRepet
  	errors[, 1] <- Inf#mean((as.numeric(as.character(Y)) - # error with no predictors
 		#ifelse(all(Y %in% 0:1), round(mean(as.numeric(as.character(Y)))), mean(Y)))^2)
 
-	mean.errors <- colMeans(errors); sd.errors <- apply(errors, 2, sd)/sqrt(repetitions) #### GGG compute average/std dev error across all repetitions I added the division by sqrt...
+	mean.errors <- colMeans(errors); sd.errors <- apply(errors, 2, sd)/sqrt(innerRepetitionsGGG) #### GGG compute average/std dev error across all repetitions I added the division by sqrt...
 	sd.errors[1] = 0 # GGG (since there is no variation when no variable is included for prediction)
 	
 	optimum.number <- which(mean.errors <= # optimal number using the s.e. rule  ## note can't be <2 because 1 (0 variables) is associated to Inf error
