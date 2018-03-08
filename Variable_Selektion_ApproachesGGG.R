@@ -232,8 +232,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 			SEerrors[i] = errRes$se
 		# define the next set of variables
 			if (recompute == F & i > 1) selections[[i - 1]] <- selections[[i]][-i]
-			if (recompute == T & i > 1) {
-				selections[[i - 1]] <- names(sort(Importance(forest, type), decreasing = T))[-i]
+			if (recompute == T & i > 1) selections[[i - 1]] <- names(sort(Importance(forest, type), decreasing = T))[-i]
 			}	
 			if(i%%100==0)
 				cat("Diaz:", ncol(X)-i+1, "out of", ncol(X), "variables done\n")
@@ -255,9 +254,9 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 			varNumNext = round(varNum*(1-fracDropped)) 
 			if(varNumNext==varNum)
 				break
-			if (recompute == F & varNum > 1) selections[[varNumNext]] <- selections[[varNumNext]][-((varNumNext+1):varNum)]
+			if (recompute == F & varNum > 1) selections[[varNumNext]] <- selections[[varNum]][-((varNumNext+1):varNum)]
 			if (recompute == T & varNum > 1) selections[[varNumNext]] <- names(sort(Importance(forest, type), decreasing = T))[-((varNumNext+1):varNum)] 
-			if(i%%10==0)
+			if(varNum%%10==0)
 				cat("Diaz:", varNum, "out of", ncol(X), "variables done\n")
 			varNum = varNumNext	
 		}
@@ -267,7 +266,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 	SEerrors =c(0, SEerrors)
 	# define the number of variables determined by the 0 s.e. and 1 s.e. rule
 	optimum.number.0se <- which.min(errors)
-	optimum.number.1se <- which(errors <= min(errors) + SEerrors[optimum.number.0se])[1] ### GGG standard error calculated on the predictions, not on multiple data sets...
+	optimum.number.1se <- which(errors <= min(errors, na.rm=T) + SEerrors[optimum.number.0se])[1] ### GGG standard error calculated on the predictions, not on multiple data sets...
 	# compute the corresponding forests and OOB-errors ### for regression standard error considered as zero -- to estimate it, complicated, several options, so leave as is
 	if (optimum.number.0se == 1) {forest.0se <- NULL; selection.0se <- NULL} ### GGG no features selected
 	if (optimum.number.1se == 1) {forest.1se <- NULL; selection.1se <- NULL}
@@ -400,7 +399,7 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, allVariables
 ##################################
 ### The G.i and G.p approaches ###
 ##################################
-GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, innerRepetitionsGGG = 50, type="randomForest"){
+GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, innerRepetitionsGGG = 1, type="randomForest"){
 	# defaults as in paper
 	### GGG In paper, they use se.rule = 0
   # Y: response vector
