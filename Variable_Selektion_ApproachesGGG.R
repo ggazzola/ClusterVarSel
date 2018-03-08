@@ -233,7 +233,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 		# define the next set of variables
 			if (recompute == F & i > 1) selections[[i - 1]] <- selections[[i]][-i]
 			if (recompute == T & i > 1) selections[[i - 1]] <- names(sort(Importance(forest, type), decreasing = T))[-i]
-			}	
+				
 			if(i%%100==0)
 				cat("Diaz:", ncol(X)-i+1, "out of", ncol(X), "variables done\n")
 		}
