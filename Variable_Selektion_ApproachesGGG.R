@@ -352,7 +352,7 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, allVariables
                      #as.character(train$response)))), mean(train$response)))^2)}}
 					#### GGG is repetitions by variable by fold
   mean.errors <- sapply(1:(ncol(X) + 1), function(x) mean(errors[, x, ])) ### GGG mean error for each variable, averaged out by fold and repetition
-  optimum.number <- which.min(mean.errors)   # optimal number of variables
+  optimum.number <- which.min(mean.errors)   # optimal number of variables # robust to NAs (e.g., in case of allVariables=FALSE)
   if (optimum.number == 1) { # determine the final forest, selection and OBB-error
    forest <- NULL; selection <- NULL}
   if (optimum.number != 1) {

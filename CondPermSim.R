@@ -1238,7 +1238,7 @@ if(what == "Heart") {
 	})
 	
 	trueModelY = expression({
-		Y = as.data.frame(as.factor(dat[ , 14])) # regression, as done in Hapfelmeier
+		Y = as.data.frame(as.factor(dat[ , 14]))
 	})	
 }
 

@@ -25,6 +25,14 @@ if(numRepGGG>0) {
 	for(i in 1:numRepGGG){
 		tmp = read.table(fileListGGG[i], header=T)
 		methods = as.character(tmp$method)
+		if(i ==1){
+			methodsReference = methods
+		} else{
+			if(length(methods)!=length(methodReference))
+				stop(fileListGGG, ": Different GGG methods used across repeats\n")
+			if(any(methods!=methodsReference))
+				stop(fileListGGG, ": Different GGG methods used across repeats\n")
+		}	
 		tmp$method = NULL
 		colNames = colnames(tmp)
 		matGGG[[i]] = tmp
@@ -65,6 +73,14 @@ if(numRepCompet>0) {
 	for(i in 1:numRepCompet){
 		tmp = read.table(fileListCompet[i], header=T)
 		methods = as.character(tmp$method)
+		if(i ==1){
+			methodsReference = methods
+		} else{
+			if(length(methods)!=length(methodReference))
+				stop(fileListGGG, ": Different Compet methods used across repeats\n")
+			if(any(methods!=methodsReference))
+				stop(fileListGGG,": Different Compet methods used across repeats\n")
+		}
 		tmp$method = NULL
 		colNames = colnames(tmp)
 		matCompet[[i]] = tmp
