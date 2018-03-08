@@ -193,7 +193,7 @@ ALTGGG <- function(Y, X, nperm = 400, ntree = 100, alpha = 0.05, type="randomFor
 ############################################
 ### The J.0, J.1, D.0 and D.1 approaches ###
 ############################################
-DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest") {
+DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", fracDropped = ifelse(recompute, 0.1, 0.2)) {
 #For Diaz paper, suggested ntree is 2000 or 5000
 #For Jiang, ntree = 10000, but the implementation is actually different from this one
 # Y: response vector
@@ -214,27 +214,54 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest") {
 	forest = TrainForest(dat, mtry, ntree, type)
 	selections <- list() # a list that contains the sequence of selected variables
 	selections[[ncol(X)]] <- names(sort(Importance(forest, type), decreasing = T))
-	errors <- NULL
-	SEerrors = NULL
-	for (i in ncol(X):1) { # take backward rejection steps ### GGG without eliminating FRACTIONS of variables at a time
-		mtry = ChooseMtry(i,Y)
-		if(includeSeed){
-			seedVal = sum(as.numeric(gsub("X", "", selections[[i]])))
-			set.seed(seedVal)
-		}	
-		forest = TrainForest(dat, mtry, ntree, type, selections[[i]])
+	errors <- rep(NA, ncol(X))
+	SEerrors = rep(NA, ncol(X))
+	if(fracDropped==0){
+		for (i in ncol(X):1) { # take backward rejection steps ### GGG without eliminating FRACTIONS of variables at a time
+			mtry = ChooseMtry(i,Y)
+			if(includeSeed){
+				seedVal = sum(as.numeric(gsub("X", "", selections[[i]])))
+				set.seed(seedVal)
+			}	
+			forest = TrainForest(dat, mtry, ntree, type, selections[[i]])
 
-	#errors[i] <- mean((as.numeric(as.character(Y)) - # compute the OOB-error
-	#                  as.numeric(as.character(predict(forest, OOB = T))))^2)
-		errRes = Error(forest, Y, selections[[i]], returnSE=T)
-		errors[i] =  errRes$error
-		SEerrors[i] = errRes$se
-	# define the next set of variables
-		if (recompute == F & i > 1) selections[[i - 1]] <- selections[[i]][-i]
-		if (recompute == T & i > 1) selections[[i - 1]] <- names(sort(Importance(forest, type), decreasing = T))[-i]
-		if(i%%100==0)
-			cat("Diaz:", ncol(X)-i+1, "out of", ncol(X), "variables done\n")
-	}
+		#errors[i] <- mean((as.numeric(as.character(Y)) - # compute the OOB-error
+		#                  as.numeric(as.character(predict(forest, OOB = T))))^2)
+			errRes = Error(forest, Y, selections[[i]], returnSE=T)
+			errors[i] =  errRes$error
+			SEerrors[i] = errRes$se
+		# define the next set of variables
+			if (recompute == F & i > 1) selections[[i - 1]] <- selections[[i]][-i]
+			if (recompute == T & i > 1) {
+				selections[[i - 1]] <- names(sort(Importance(forest, type), decreasing = T))[-i]
+			}	
+			if(i%%100==0)
+				cat("Diaz:", ncol(X)-i+1, "out of", ncol(X), "variables done\n")
+		}
+	} else{
+	  	varNum = ncol(X)
+	  	while(varNum>0){
+			
+			mtry = ChooseMtry(varNum,Y)
+			if(includeSeed){
+				seedVal = sum(as.numeric(gsub("X", "", selections[[varNum]])))
+				set.seed(seedVal)
+			}	
+			forest = TrainForest(dat, mtry, ntree, type, selections[[varNum]])
+			errRes = Error(forest, Y, selections[[varNum]], returnSE=T)
+			errors[varNum] =  errRes$error
+			SEerrors[varNum] = errRes$se
+			
+			varNumNext = round(varNum*(1-fracDropped)) 
+			if(varNumNext==varNum)
+				break
+			if (recompute == F & varNum > 1) selections[[varNumNext]] <- selections[[varNumNext]][-((varNumNext+1):varNum)]
+			if (recompute == T & varNum > 1) selections[[varNumNext]] <- names(sort(Importance(forest, type), decreasing = T))[-((varNumNext+1):varNum)] 
+			if(i%%10==0)
+				cat("Diaz:", varNum, "out of", ncol(X), "variables done\n")
+			varNum = varNumNext	
+		}
+	}	
 	# compute the error expected when no predictor is used at all
 	errors = c(Inf, errors)
 	SEerrors =c(0, SEerrors)
@@ -272,7 +299,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest") {
 ########################
 ### The SVT approach ###
 ########################
-SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, allVariables = T, type="randomForest") {
+SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, allVariables = F, type="randomForest") {
 	# defaults as in papers -- for ntree they are not too specific, but certainly >=1000
   # Y: response vector
   # X: matrix or data frame containing the predictors
