@@ -436,7 +436,9 @@ GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, innerRepet
  	errors[, 1] <- Inf#mean((as.numeric(as.character(Y)) - # error with no predictors
 		#ifelse(all(Y %in% 0:1), round(mean(as.numeric(as.character(Y)))), mean(Y)))^2)
 
-	mean.errors <- colMeans(errors); sd.errors <- apply(errors, 2, sd)/sqrt(innerRepetitionsGGG) #### GGG compute average/std dev error across all repetitions I added the division by sqrt...
+	mean.errors <- colMeans(errors); 
+	sd.errors <- apply(errors, 2, sd)/sqrt(innerRepetitionsGGG) #### GGG compute average/std dev error across all repetitions I added the division by sqrt...
+	sd.errors[is.na(sd.errors)] = 0 # 	takes care of the case in which innerRepetitionsGGG = 1
 	sd.errors[1] = 0 # GGG (since there is no variation when no variable is included for prediction)
 	
 	optimum.number <- which(mean.errors <= # optimal number using the s.e. rule  ## note can't be <2 because 1 (0 variables) is associated to Inf error
