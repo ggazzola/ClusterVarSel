@@ -28,7 +28,7 @@ if(numRepGGG>0) {
 		if(i ==1){
 			methodsReference = methods
 		} else{
-			if(length(methods)!=length(methodReference))
+			if(length(methods)!=length(methodsReference))
 				stop(fileListGGG, ": Different GGG methods used across repeats\n")
 			if(any(methods!=methodsReference))
 				stop(fileListGGG, ": Different GGG methods used across repeats\n")
@@ -76,7 +76,7 @@ if(numRepCompet>0) {
 		if(i ==1){
 			methodsReference = methods
 		} else{
-			if(length(methods)!=length(methodReference))
+			if(length(methods)!=length(methodsReference))
 				stop(fileListGGG, ": Different Compet methods used across repeats\n")
 			if(any(methods!=methodsReference))
 				stop(fileListGGG,": Different Compet methods used across repeats\n")
