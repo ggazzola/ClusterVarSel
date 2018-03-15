@@ -9,6 +9,7 @@ whichGGGMean=grep("MeanGGGOverall", fileList)
 whichGGGSe=grep("SeGGGOverall", fileList)
 existsGGG = length(whichGGGMean)==1 & length(whichGGGSe)==1
 
+roundingFactor = 3
 multiply = F
 if(existsGGG){
 	nameSim = strsplit(fileList[whichGGGMean], "MeanGGG")[[1]][1] 
@@ -90,18 +91,38 @@ if(length(whichStdCPI)>0){
 	
 	newMeanMat = rbind(newMeanMat, stdCPIMeanRows)
 	newSeMat = rbind(newSeMat, stdCPISeRows)
-	
 }
+
+methNames = newMeanMat[,1]
+whichStdCPI = grep("Std-CPI", methNames)
+whichDBC = grep("DBC-RCPI", methNames)
+if(any(whichDBC!=(1:length(whichDBC))))
+	stop("DBC-RCPI should be the first method in the table")
+
+if(!is.null(compMean)){
+	whichLEBM = which.min(newMeanMat[-whichDBC,3])+length(whichDBC)
+	#if(length(whichStdCPI)>0){	
+	#	whichLEBMNoStdCPI = which.min(newMeanMat[-whichStdCPI,3])
+	#} else{
+	#	whichLEBMNoStdCPI = NULL
+	#}
+} else{
+	stop("Must have Competing files for computation of LEBM performance measures")
+}
+
+newMeanMat = cbind(newMeanMat, matrix(NA, nrow=nrow(newMeanMat), ncol=2))
+
+newMeanMat[, 4] =  round((newMeanMat[whichLEBM,2]-newMeanMat[, 2])/newMeanMat[, 2], roundingFactor)
+newMeanMat[, 5] =  round((newMeanMat[whichLEBM,3]-newMeanMat[, 3])/newMeanMat[, 3], roundingFactor)
 
 #colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\mathcal{v}}}", "\\bs{\\tilde{\mathcal{v}}}", "\\bs{\\bar{\mathcal{v}}_s}", 
 	#"\\bs{\\bar{e}}",  "\\bs{\\tilde{e}}",  "\\bs{\\bar{e}_s}")
-colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\\mathcal{v}}^*}", "\\bs{\\bar{e}^*}")
+colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\\mathcal{v}}^*}", "\\bs{\\bar{e}^*}", "\\bs{r_{\\bar{v}^*}}", "\\bs{r_{\\bar{e}^*}}")
 
 for(i in 1:nrow(newMeanMat)){
-	for(j in 2:ncol(newMeanMat)){
-		newMeanMat[i, j] = paste(abs(round(as.numeric(newMeanMat[i,j]), 3)), abs(round(as.numeric(newSeMat[i,j]), 3)), sep="\\pm")
+	for(j in 2:3){
+		newMeanMat[i, j] = paste(abs(round(as.numeric(newMeanMat[i,j]), roundingFactor)), abs(round(as.numeric(newSeMat[i,j]), 3)), sep="\\pm")
 	}
-	
 	currMeth = newMeanMat[i,1] 
 	currMeth = paste0("\\text{\\textsf{", currMeth, "}}")
 	newMeanMat[i,1]  = currMeth
@@ -110,6 +131,3 @@ for(i in 1:nrow(newMeanMat)){
 write.csv(newMeanMat, file=paste(nameSim, "MergedMeanSe.csv", sep=""), quote=F, row.names=F)
 
 cat(nameSim, "DONE \n")
-
-
-
