@@ -112,8 +112,8 @@ if(!is.null(compMean)){
 
 newMeanMat = cbind(newMeanMat, matrix(NA, nrow=nrow(newMeanMat), ncol=2))
 
-newMeanMat[, 4] =  round((newMeanMat[whichLEBM,2]-newMeanMat[, 2])/newMeanMat[, 2], roundingFactor)
-newMeanMat[, 5] =  round((newMeanMat[whichLEBM,3]-newMeanMat[, 3])/newMeanMat[, 3], roundingFactor)
+newMeanMat[, 4] =  round((newMeanMat[whichLEBM,2]-newMeanMat[, 2])/newMeanMat[whichLEBM, 2], roundingFactor)
+newMeanMat[, 5] =  round((newMeanMat[whichLEBM,3]-newMeanMat[, 3])/newMeanMat[whichLEBM, 3], roundingFactor)
 
 #colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\mathcal{v}}}", "\\bs{\\tilde{\mathcal{v}}}", "\\bs{\\bar{\mathcal{v}}_s}", 
 	#"\\bs{\\bar{e}}",  "\\bs{\\tilde{e}}",  "\\bs{\\bar{e}_s}")
