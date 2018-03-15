@@ -99,8 +99,11 @@ whichDBC = grep("DBC-RCPI", methNames)
 if(any(whichDBC!=(1:length(whichDBC))))
 	stop("DBC-RCPI should be the first method in the table")
 
+if(length(whichStdCPI)==0)
+	stop("No Std-CPI results")
+
 if(!is.null(compMean)){
-	whichLEBM = which.min(newMeanMat[-whichDBC,3])+length(whichDBC)
+	whichLEBM = which.min(newMeanMat[-c(whichDBC,whichStdCPI),3])+length(whichDBC)
 	#if(length(whichStdCPI)>0){	
 	#	whichLEBMNoStdCPI = which.min(newMeanMat[-whichStdCPI,3])
 	#} else{
