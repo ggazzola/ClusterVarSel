@@ -144,7 +144,7 @@ if(what == "HapfMixed20D") {
 	}) # without main effects, the random forest has worse performance
 }
 
-if(what == "Hapf20DDecreasCov") {
+if(what == "Hapf20DDiffCov") {
 	fileName = paste("Hapf20DDiffCovN", nPts, "Cov", covVal, "Rsq", desiredRsq, "Pow", corPower, "minNum", minNumPtsPerPart, sep="")
 
 	trueModelX = expression({ 
