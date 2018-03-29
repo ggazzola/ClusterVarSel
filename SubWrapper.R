@@ -22,6 +22,15 @@ methodVect = c("ClusterSimple", "StroblNonRec") ############### ClusterSimple; S
 toDo = c("GGG", "competing")     ############################
 forestType = "randomForest" # cforest, randomForest
 defaultMtry = T  ############################
+useExistingWarmStart = F
+if(useExistingWarmStart){
+	methodVect = "ClusterSimple"
+	toDo = "GGG"
+	cat("Forcing methodVect 'ClusterSimple' and toDo = 'GGG'\n")
+	numVarAfterExistingWarmStart = 200
+} else{
+	numVarAfterExistingWarmStart = NULL
+}
 
 bigDataSets = c("brain", "Leukemia", "lymphoma", "prostate", "srbct", "Colon", "Nci", "Adenocarcinoma", "Breast2Class", "Breast3Class")
 if(what%in%c("fMRI",bigDataSets)){
@@ -45,6 +54,11 @@ if(what%in%bigDataSets){
 	warmStart =  F
 	numVarAfterWarmStart =  Inf
 }
+
+if(useExistingWarmStart){
+	cat("WARNING: ignoring warmStart (set to F)\n")
+	warmStart = F
+} 
 
 nTree =   1000 #########################
 nPts= 100  ####################### 
@@ -101,6 +115,8 @@ rFileList = c("CondPermSim.R", "ExtraRFCode.R", "GGGParty.R",
 	if(cnt ==1){
 		filNamTmp = filNam
 		filNamTmp = gsub(paste("Rep", repeatIdxVect[1], sep=""), "", filNamTmp)
+		if(useExistingWarmStart)
+			filNamTmp = paste(filNamTmp, "ExistingWarmStart", sep="")
 		dirName = paste(filNamTmp, dateTmp , sep="")
 		system(paste("mkdir", dirName))
 		for(ff in rFileList)

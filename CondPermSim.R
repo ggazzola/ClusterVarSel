@@ -1305,23 +1305,80 @@ if(forestType=="cforest"){
 fileName =  paste(fileName, extraName, forestName, sep="")
 fileNameFinal = paste(fileName, "SelVar.RData", sep="")
 
+fileNameFinalExists = file.exists(fileNameFinal)
+if(useExistingWarmStart){
+	if(!fileNameFinalExists){
+		fileList = list.files()
+		fileForExistingWarmStart = fileList[grep("SelVar.RData", fileList)]
+		fileForExistingWarmStart = fileForExistingWarmStart[grep(paste("Rep", partRepeat, sep=""), fileForExistingWarmStart)]
+		fileForExistingWarmStartNum = length(fileForExistingWarmStart)
+		stopifnot(fileForExistingWarmStartNum<=1)
+		if(fileForExistingWarmStartNum==0){
+			stop("Cannot get an existing warm-start solution because neither ", fileNameFinal, " nor other *SelVar.RData files exist")	
+		} else{
+			if(length(grep("OriginalSelectedVariables", fileForExistingWarmStart)>0))
+				stop("The only relevant file I found is ", fileForExistingWarmStart)
+			cat("WARNING\n")
+			cat("WARNING: could not find", fileNameFinal, "but found", fileForExistingWarmStart, "so using that one instead\n")
+			cat("WARNING\n")
+		}	
+	} else{
+		fileForExistingWarmStart = fileNameFinal
+	}
+	fileNameFinalRenamed = paste(fileForExistingWarmStart, "OriginalSelectedVariables.RData", sep="")
+}
+
 
 
 if(!onlyReturnName) {
-	if(file.exists(fileNameFinal)){
-		load(fileNameFinal)
-		firstSim = length(resSim)+1
-		print(paste(fileNameFinal, "already exists"))
-		if(firstSim>numFolds){
-			print(paste("Next fold = ", firstSim, "> numFolds =", numFolds, " -- quitting"))
-			quit()
+	if((!useExistingWarmStart & fileNameFinalExists) | useExistingWarmStart){
+		# we won't get in here if there are no files for useExistingWarmStart
+		if(useExistingWarmStart){
+			stopifnot(numVarAfterExistingWarmStart<=p)
+			firstSim = 1
+			cat("Retrieving warm-start solution from ", fileForExistingWarmStart, "\n")
+			newEnv = new.env()
+			load(fileForExistingWarmStart, envir=newEnv)
+			if(is.logical(newEnv$useExistingWarmStart))
+				if(newEnv$useExistingWarmStart)
+					stop(fileForExistingWarmStart, " already has useExistingWarmStart=T")
+			for(aaa in 1:length(newEnv$resSim)){
+				stopifnot(newEnv$resSim[[aaa]][[1]]$method=="ClusterSimple")
+						# the below is correct only if "ClusterSimple" is the first element of resSim[[aaa]][[bbb]]
+				if(length(newEnv$resSim[[aaa]])>1)
+					for(bbb in 2:length(newEnv$resSim[[aaa]]))
+						newEnv$resSim[[aaa]][[bbb]] = list(NULL) # just to save some RAM
+			}
+			stopifnot(identical(datAll, newEnv$datAll))
+			stopifnot(identical(numFolds, newEnv$numFolds))
+			stopifnot(identical(as.character(trueModelX), as.character(newEnv$trueModelX)))
+			stopifnot(identical(as.character(trueModelY), as.character(newEnv$trueModelY)))
+			stopifnot(identical(inIdxList, newEnv$inIdxList))
+			stopifnot(identical(outIdxList, newEnv$outIdxList))
+			
+			
+			assign("resSimExistingWarmStart", get("resSim", newEnv))
+			rm(newEnv)
+			system(paste("mv", fileForExistingWarmStart, fileNameFinalRenamed))
+			
 		} else{
-			print(paste("Starting from fold ", firstSim, "out of", numFolds))
-		}
-	} else{
-		firstSim = 1
-	}
+			load(fileNameFinal)
+			
+			firstSim = length(resSim)+1
+			print(paste(fileNameFinal, "already exists"))
 	
+			if(firstSim>numFolds){
+				print(paste("Next fold = ", firstSim, "> numFolds =", numFolds, " -- quitting"))
+				quit()
+			} else{
+				print(paste("Starting from fold ", firstSim, "out of", numFolds))
+			}
+		}	
+	} else{
+		if(useExistingWarmStart)
+			stop("Cannot get an existing warm-start solution because ", fileNameFinal, " does not exist")
+		firstSim = 1
+	} 
 	print(paste("Starting work on", fileName))
 
 	for (sim in firstSim:numFolds){
@@ -1345,19 +1402,40 @@ if(!onlyReturnName) {
 			#set.seed(sim) # putting this here, because what happens after training the RF uses the random stream differently depending on the parameters (e.g. k-means)
 			#X = XAll[foldIndices != sim,]
 			#Y = YAll[foldIndices != sim]
-			X = XAll[inIdxList[[sim]],]
-			Y = YAll[inIdxList[[sim]],] # here Y loses its name
-			nPts = nrow(X)
+			
 			#ptsHash = apply(X, 1, paste, collapse="")
 			#nUniquePts = length(unique(ptsHash))
 			#partNum = floor(nUniquePts*(1-0.632)/minNumPtsPerPart)
 		
-			resSub = list()
-			cntSub = 1
-			subPerfMeanVect = subPerfSEVect = numeric(p)
-			variablesIn = colnames(XAll)
-
-			for(pSub in p:1){
+			resSub = list()	
+			
+			if(useExistingWarmStart){
+				stopifnot(meth=="ClusterSimple")
+				stopifnot(cntMu==1)
+				subPerfMeanVect = resSimExistingWarmStart[[sim]][[cntMu]]$perfMeanVect
+				subPerfMeanVect[1:numVarAfterExistingWarmStart] = 0
+				subPerfSEVect = resSimExistingWarmStart[[sim]][[cntMu]]$subPerfSEVect
+				subPerfSEVect[1:numVarAfterExistingWarmStart] = 0
+				variablesIn = resSimExistingWarmStart[[sim]][[cntMu]]$resSub[[numVarAfterExistingWarmStart]]$variablesIn
+				for(rrr in (numVarAfterExistingWarmStart+1):p)
+					resSub[[rrr]] = resSimExistingWarmStart[[sim]][[cntMu]]$resSub[[rrr]]
+				
+				resSimExistingWarmStart[[sim]][[cntMu]]=list(NULL) # to save RAM
+				X = datAll[inIdxList[[sim]],which(names(datAll)%in%variablesIn)] #Probably not an issue, but this is a dataframe! (the below could be a matrix)
+				Y = datAll[inIdxList[[sim]],which(names(datAll)=="Y")] 
+				startingPSub = numVarAfterExistingWarmStart
+			} else{
+				
+				subPerfMeanVect = subPerfSEVect = numeric(p)
+				variablesIn = colnames(XAll)
+				X = XAll[inIdxList[[sim]],]
+				Y = YAll[inIdxList[[sim]],] # here Y loses its name
+				startingPSub = p
+			}
+			nPts = nrow(X)
+			
+			
+			for(pSub in startingPSub:1){
 				# performance here is computed on the training data (either on the OOB part of it, if defaultMtry = T
 				# or on several validation portions of it, otherwise)
 				cat(paste("Starting fold", sim, "out of", numFolds, " -- method", cntMu, "out of", length(methodVect), "-- variable", p-pSub+1, "out of", p, "\n"))
@@ -1635,7 +1713,9 @@ if(!onlyReturnName) {
 		}
 	
 		resSim[[sim]] = resMu
-		save(resSim, corPower, MIC, inIdxList, outIdxList, datAll,includeSeed, numFolds, numFoldsCrossVal, nTree, nPts, mTryPropVect, methodVect, topQuantile,trueModelX, trueModelY, forestType, file=fileNameFinal)
+		save(resSim, corPower, MIC, useExistingWarmStart, numVarAfterWarmStart, numVarAfterExistingWarmStart, 
+			inIdxList, outIdxList, datAll,includeSeed, numFolds, numFoldsCrossVal, nTree, nPts, mTryPropVect,
+			methodVect, topQuantile,trueModelX, trueModelY, forestType, file= fileNameFinal)
 	
 		cat("\n\n")
 	
