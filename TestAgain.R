@@ -1,7 +1,7 @@
 
 inputVals = commandArgs(trailingOnly=TRUE)
 if (length(inputVals)>1 ) {
-  stop("Usage: ./TestMethodWrap.R [optional: <competing>]", call.=FALSE)
+  stop("Usage: ./TestAgain.R [optional: <competing>]", call.=FALSE)
 } 
 
 require(randomForest)
