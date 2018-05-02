@@ -501,7 +501,7 @@ BorutaGGG = function(Y, X, ntree=1000) {
 		
 }
 
-GRFGGG = function(Y, X, ntree=1000, gammaGRF=1, gammaGRRF=0.5) {
+GRFGGG = function(Y, X, ntree=1000, gammaGRF=1, gammaGRRF=0.9) {
 	
 	suppressWarnings(suppressMessages(require(RRF)))
 	cat("Loading RRF\n")

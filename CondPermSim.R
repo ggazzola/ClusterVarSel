@@ -1347,7 +1347,8 @@ if(!onlyReturnName) {
 						# the below is correct only if "ClusterSimple" is the first element of resSim[[aaa]][[bbb]]
 				if(length(newEnv$resSim[[aaa]])>1)
 					for(bbb in 2:length(newEnv$resSim[[aaa]]))
-						newEnv$resSim[[aaa]][[bbb]] = list(NULL) # just to save some RAM
+						newEnv$resSim[[aaa]][[bbb]] = list(NULL) # removing results for anything other than ClusterSimple, 
+																 # just to save some RAM
 			}
 			stopifnot(identical(datAll, newEnv$datAll))
 			stopifnot(identical(numFolds, newEnv$numFolds))
@@ -1414,7 +1415,7 @@ if(!onlyReturnName) {
 				stopifnot(cntMu==1)
 				subPerfMeanVect = resSimExistingWarmStart[[sim]][[cntMu]]$perfMeanVect
 				subPerfMeanVect[1:numVarAfterExistingWarmStart] = 0
-				subPerfSEVect = resSimExistingWarmStart[[sim]][[cntMu]]$subPerfSEVect
+				subPerfSEVect = resSimExistingWarmStart[[sim]][[cntMu]]$perfSEVect
 				subPerfSEVect[1:numVarAfterExistingWarmStart] = 0
 				variablesIn = resSimExistingWarmStart[[sim]][[cntMu]]$resSub[[numVarAfterExistingWarmStart]]$variablesIn
 				for(rrr in (numVarAfterExistingWarmStart+1):p)

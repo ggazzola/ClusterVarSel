@@ -33,6 +33,7 @@ if(competingMethods) {
 	#methodVect = c("Diaz", "Diaz1") # supposedly, these will be more parsimonious
 	
 	numFolds = length(resSim)
+	rm(resSim) # we don't need this anymore after this, plus it's RAM heavy
 	# nTree will be set as in resSim
 }
 	
