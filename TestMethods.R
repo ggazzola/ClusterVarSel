@@ -32,20 +32,51 @@ if(competingMethods) {
 	methodVect = c("Nap",  "NapB", "Alt", "Diaz", "Diaz1", "DiazRecomp", "DiazRecomp1", "Svt", "GenP", "GenI", "Boruta", "GRF", "GRRF")
 	#methodVect = c("Diaz", "Diaz1") # supposedly, these will be more parsimonious
 	
+	if("NapB"%in%methodVect){
+		stopifnot("Nap"%in%methodVect)
+		stopifnot(which(methodVect=="Nap")<which(methodVect=="NapB"))	
+	}
+	
+	if("Diaz1"%in%methodVect){
+		stopifnot("Diaz"%in%methodVect)
+		stopifnot(which(methodVect=="Diaz")<which(methodVect=="Diaz1"))	
+	}
+	
+	if("DiazRecomp1"%in%methodVect){
+		stopifnot("DiazRecomp"%in%methodVect)
+		stopifnot(which(methodVect=="DiazRecomp")<which(methodVect=="DiazRecomp1"))	
+	}
+	
+	if("GenI"%in%methodVect){
+		stopifnot("GenP"%in%methodVect)
+		stopifnot(which(methodVect=="GenP")<which(methodVect=="GenI"))	
+	}
+	
+	if("GRRF"%in%methodVect){
+		stopifnot("GenP"%in%methodVect)
+		stopifnot(which(methodVect=="GRF")<which(methodVect=="GRRF"))	
+	}
+	
 	numFolds = length(resSim)
 	rm(resSim) # we don't need this anymore after this, plus it's RAM heavy
 	# nTree will be set as in resSim
 }
-	
+
 cat("Starting model testing...\n")
 
 #### REGULARIZED RF FOR CLASS?
 
 selModel = list()
 
+if(competingMethods)
+	variablesInSelectedNAPBList = variablesInSelectedDiaz1List = variablesInSelectedDiazRecomp1List = 
+		variablesInSelectedGenIList = variablesInSelectedGRRFList = list() # this works only because
+										# for competing methods stdErrNumVect has only one element (notRelevant)
+
 for(j in 1:length(methodVect)) {
 	selModel[[j]] =list()
 	stdErrInfoList = list()
+
 	for(k in 1:length(stdErrNumVect)) {
 		stdErrInfo = list()
 		for(i in 1:numFolds){ 
@@ -58,24 +89,21 @@ for(j in 1:length(methodVect)) {
 			datOut = datAll[outIdxList[[i]],]
 			datXOut = datOut[, colnames(datOut)!="Y"]
 			datYOut = datOut$Y
-			
-			cntNAP = cntDiaz = cntGRF = cntDiazRecomp = cntGen = 1 # this needs to happen at the beginning of every fold
+		
 			if(competingMethods){
 				ptm <- proc.time()
 				
 				perfStdErrBest = 1 # just a workaround, since this is irrelevant and set to a "dummy value"
 									# except for Diaz, for which we have a measure of it...
 				if(methodVect[j]=="Nap" | methodVect[j]=="NapB") {					
-					if(cntNAP==1) {
-						resNAP  = NAPGGG(datYIn, datXIn)
-					}
 					if(methodVect[j]=="Nap"){
+						resNAP  = NAPGGG(datYIn, datXIn)
 						variablesInSelected = resNAP$selection
+						variablesInSelectedNAPBList[[i]] = resNAP$selection.bonf
 					} else{
-						variablesInSelected = resNAP$selection.bonf
-					}
-					cntNAP = cntNAP + 1	
-					
+						cat("NapB: using results precomputed with Nap\n")
+						variablesInSelected = variablesInSelectedNAPBList[[i]]
+					}					
 				}
 				
 				if(methodVect[j]=="Alt") {
@@ -83,29 +111,27 @@ for(j in 1:length(methodVect)) {
 					variablesInSelected = resALT$selection		
 				}
 				
-				if(methodVect[j]=="Diaz" | methodVect[j]=="Diaz1") {
-					if(cntDiaz==1) {
-						resDiaz  = DiazGGG(datYIn, datXIn, ntree=nTree)
-					}
+				if(methodVect[j]=="Diaz" | methodVect[j]=="Diaz1") {				
 					if(methodVect[j]=="Diaz"){
+						resDiaz  = DiazGGG(datYIn, datXIn, ntree=nTree)
 						variablesInSelected = resDiaz$selection.0se
+						variablesInSelectedDiaz1List[[i]] = resDiaz$selection.1se
 					} else{
-						variablesInSelected = resDiaz$selection.1se
+						cat("Diaz1: using results precomputed with Diaz\n")
+						variablesInSelected = variablesInSelectedDiaz1List[[i]]
 					}
 					perfStdErrBest = resDiaz$perfStdErrBest
-					cntDiaz = cntDiaz+1
 				}
 				
 				if(methodVect[j]=="DiazRecomp" | methodVect[j]=="DiazRecomp1") {
-					if(cntDiazRecomp==1) {
-						resDiazRecomp  = DiazGGG(datYIn, datXIn, recompute = T, ntree=nTree)
-					}
 					if(methodVect[j]=="DiazRecomp"){
+						resDiazRecomp  = DiazGGG(datYIn, datXIn, recompute = T, ntree=nTree)
 						variablesInSelected = resDiazRecomp$selection.0se
+						variablesInSelectedDiazRecomp1List[[i]] = resDiazRecomp$selection.1se
 					} else{
-						variablesInSelected = resDiazRecomp$selection.1se
+						cat("DiazRecomp1: using results precomputed with DiazRecomp\n")
+						variablesInSelected = variablesInSelectedDiazRecomp1List[[i]]
 					}
-					cntDiazRecomp = cntDiazRecomp+1
 				}
 				
 				if(methodVect[j]=="Svt") {
@@ -114,16 +140,14 @@ for(j in 1:length(methodVect)) {
 				}
 				
 				if(methodVect[j]=="GenP" | methodVect[j]=="GenI") {
-					if(cntGen==1) {
-						resGen  = GenGGG(datYIn, datXIn, ntree=nTree)
-					}	
 					if(methodVect[j]=="GenP"){
+						resGen  = GenGGG(datYIn, datXIn, ntree=nTree)
 						variablesInSelected = resGen$selection.pred
+						variablesInSelectedGenIList[[i]] = resGen$selection.int
 					} else{
-						variablesInSelected = resGen$selection.int
-					}
-					cntGen = cntGen+1
-					
+						cat("GenI: using results precomputed with GenP\n")
+						variablesInSelected = variablesInSelectedGenIList[[i]]
+					}					
 				}
 				
 				if(methodVect[j]=="Boruta") {
@@ -132,15 +156,14 @@ for(j in 1:length(methodVect)) {
 				}
 				
 				if(methodVect[j]=="GRF" | methodVect[j]=="GRRF") {
-					if(cntGRF==1) {
-						resGRF  = GRFGGG(datYIn, datXIn, ntree=nTree)
-					}
 					if(methodVect[j]=="GRF"){
+						resGRF  = GRFGGG(datYIn, datXIn, ntree=nTree)
 						variablesInSelected = resGRF$selectionGRF
+						variablesInSelectedGRRFList[[i]]= resGRF$selectionGRRF
 					} else{
-						variablesInSelected = resGRF$selectionGRRF
+						cat("GRRF: using results precomputed with GRF\n")
+						variablesInSelected = variablesInSelectedGRRFList[[i]]
 					}
-					cntGRF = cntGRF+1
 				}
 				
 				ptm = round((proc.time() - ptm)/60)

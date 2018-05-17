@@ -2,6 +2,8 @@
 TrainForest = function(dat, mtry, ntree, type, selectionNames=NULL, ...) { 
 	xFormula = ifelse(is.null(selectionNames), ".", paste(selectionNames, collapse = " + "))
 	Y = dat$Y
+	if(is.factor(Y))
+		Y = droplevels(Y) # in case training data ends up having not all classes represented in the overall data
 	if(is.null(selectionNames)) {
 		X = dat[, colnames(dat)!="Y", drop=F]
 	} else {
