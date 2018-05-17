@@ -298,7 +298,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 ########################
 ### The SVT approach ###
 ########################
-SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, allVariables = F, type="randomForest") {
+SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = ifelse(ncol(X)>1000, 10, 20), allVariables = F, type="randomForest") {
 	# defaults as in papers -- for ntree they are not too specific, but certainly >=1000
   # Y: response vector
   # X: matrix or data frame containing the predictors
@@ -399,7 +399,7 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = 20, allVariables
 ##################################
 ### The G.i and G.p approaches ###
 ##################################
-GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = 50, innerRepetitionsGGG = 1, type="randomForest"){
+GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = ifelse(ncol(X)>1000, 10, 50), innerRepetitionsGGG = 1, type="randomForest"){
 	# defaults as in paper
 	### GGG In paper, they use se.rule = 0
   # Y: response vector
@@ -501,7 +501,7 @@ BorutaGGG = function(Y, X, ntree=1000) {
 		
 }
 
-GRFGGG = function(Y, X, ntree=1000, gammaGRF=1, gammaGRRF=0.9) {
+GRFGGG = function(Y, X, ntree=1000, gammaGRF=1, gammaGRRF=ifelse(is.factor(Y), 0.5, 0.9)) {
 	
 	suppressWarnings(suppressMessages(require(RRF)))
 	cat("Loading RRF\n")
