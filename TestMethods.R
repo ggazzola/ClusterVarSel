@@ -1,8 +1,3 @@
-if("package:extendedForest" %in% search())
-	detach("package:extendedForest", unload=TRUE)
-suppressWarnings(suppressMessages(require(randomForest)))
-cat("Loading randomForest\n")
-
 if(!exists("competingMethods")){
 	print("Computing testing performance of competing methods")
 	#fileNameNoSuffix = "12DLinearN100CART" # need to specify a file to start from
@@ -29,7 +24,7 @@ if(competingMethods) {
 	source("Variable_Selektion_ApproachesGGG.R")
 	#source("ForwardSelect.R")
 	stdErrNumVect = "notRelevant"
-	methodVect = c("Nap",  "NapB", "Alt", "Diaz", "Diaz1", "DiazRecomp", "DiazRecomp1", "Svt", "GenP", "GenI", "Boruta", "GRF", "GRRF")
+	methodVect = c("Nap",  "NapB", "Alt", "Diaz", "Diaz1", "DiazRecomp", "DiazRecomp1", "DiazCPI", "DiazCPI1", "DiazRecompCPI", "DiazRecompCPI1", "Svt", "GenP", "GenI", "Boruta", "GRF", "GRRF")
 	#methodVect = c("Diaz", "Diaz1") # supposedly, these will be more parsimonious
 	
 	if("NapB"%in%methodVect){
@@ -47,6 +42,16 @@ if(competingMethods) {
 		stopifnot(which(methodVect=="DiazRecomp")<which(methodVect=="DiazRecomp1"))	
 	}
 	
+	if("DiazCPI1"%in%methodVect){
+		stopifnot("DiazCPI"%in%methodVect)
+		stopifnot(which(methodVect=="DiazCPI")<which(methodVect=="DiazCPI1"))	
+	}
+	
+	if("DiazRecompCPI1"%in%methodVect){
+		stopifnot("DiazRecompCPI"%in%methodVect)
+		stopifnot(which(methodVect=="DiazRecompCPI")<which(methodVect=="DiazRecompCPI1"))	
+	}
+	
 	if("GenI"%in%methodVect){
 		stopifnot("GenP"%in%methodVect)
 		stopifnot(which(methodVect=="GenP")<which(methodVect=="GenI"))	
@@ -56,6 +61,8 @@ if(competingMethods) {
 		stopifnot("GenP"%in%methodVect)
 		stopifnot(which(methodVect=="GRF")<which(methodVect=="GRRF"))	
 	}
+	
+
 	
 	numFolds = length(resSim)
 	rm(resSim) # we don't need this anymore after this, plus it's RAM heavy
@@ -70,10 +77,22 @@ selModel = list()
 
 if(competingMethods)
 	variablesInSelectedNAPBList = variablesInSelectedDiaz1List = variablesInSelectedDiazRecomp1List = 
+		variablesInSelectedDiazCPI1List = variablesInSelectedDiazRecompCPI1List =
 		variablesInSelectedGenIList = variablesInSelectedGRRFList = list() # this works only because
 										# for competing methods stdErrNumVect has only one element (notRelevant)
 
 for(j in 1:length(methodVect)) {
+	if(methodVect[j]%in%c("DiazCPI", "DiazCPI1", "DiazRecompCPI", "DiazRecompCPI1")) {
+		if("package:randomForest" %in% search())
+			detach("package:randomForest", unload=TRUE)
+		suppressWarnings(suppressMessages(require(extendedForest)))
+		cat("Loading extendedForest\n")
+	} else{
+		if("package:extendedForest" %in% search())
+			detach("package:extendedForest", unload=TRUE)
+		suppressWarnings(suppressMessages(require(randomForest)))
+		cat("Loading randomForest\n")
+	}
 	selModel[[j]] =list()
 	stdErrInfoList = list()
 
@@ -131,6 +150,29 @@ for(j in 1:length(methodVect)) {
 					} else{
 						cat("DiazRecomp1: using results precomputed with DiazRecomp\n")
 						variablesInSelected = variablesInSelectedDiazRecomp1List[[i]]
+					}
+				}
+				
+				if(methodVect[j]=="DiazCPI" | methodVect[j]=="DiazCPI1") {				
+					if(methodVect[j]=="DiazCPI"){
+						resDiazCPI  = DiazGGGCPI(datYIn, datXIn, ntree=nTree)
+						variablesInSelected = resDiazCPI$selection.0se
+						variablesInSelectedDiazCPI1List[[i]] = resDiazCPI$selection.1se
+					} else{
+						cat("DiazCPI1: using results precomputed with DiazCPI\n")
+						variablesInSelected = variablesInSelectedDiazCPI1List[[i]]
+					}
+					perfStdErrBest = resDiazCPI$perfStdErrBest
+				}
+				
+				if(methodVect[j]=="DiazRecompCPI" | methodVect[j]=="DiazRecompCPI1") {
+					if(methodVect[j]=="DiazRecompCPI"){
+						resDiazRecompCPI  = DiazGGGCPI(datYIn, datXIn, recompute = T, ntree=nTree)
+						variablesInSelected = resDiazRecompCPI$selection.0se
+						variablesInSelectedDiazRecompCPI1List[[i]] = resDiazRecompCPI$selection.1se
+					} else{
+						cat("DiazRecompCPI1: using results precomputed with DiazRecompCPI\n")
+						variablesInSelected = variablesInSelectedDiazRecompCPI1List[[i]]
 					}
 				}
 				
