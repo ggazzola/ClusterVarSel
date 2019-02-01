@@ -295,6 +295,107 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 		"forest.1se" = forest.1se, "oob.error.1se" = oob.error.1se, "perfStdErrBest"=SEerrors[optimum.number.0se]))
 }
 
+############################################
+### The J.0, J.1, D.0 and D.1 approaches with CPI###
+############################################
+DiazGGGCPI <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", fracDropped = ifelse(recompute, 0.1, 0.2)) {
+	#Variant of DiazGGG that uses CPI instead of PI
+	
+	mtry = ChooseMtry(ncol(X),Y)
+	dat = data.frame(Y=Y, X=X) # GGG
+	names(dat) <- c("Y", colnames(X))
+	if(includeSeed){
+		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
+		set.seed(seedVal)
+	}	
+	forest = TrainForest(dat, mtry, ntree, type)
+	selections <- list() # a list that contains the sequence of selected variables
+	selections[[ncol(X)]] <- names(sort(Importance(forest, type), decreasing = T))
+	errors <- rep(NA, ncol(X))
+	SEerrors = rep(NA, ncol(X))
+	if(fracDropped==0){
+		stop("Deprecated")
+		for (i in ncol(X):1) { # take backward rejection steps ### GGG without eliminating FRACTIONS of variables at a time
+			mtry = ChooseMtry(i,Y)
+			if(includeSeed){
+				seedVal = sum(as.numeric(gsub("X", "", selections[[i]])))
+				set.seed(seedVal)
+			}	
+			forest = TrainForest(dat, mtry, ntree, type, selections[[i]])
+
+		#errors[i] <- mean((as.numeric(as.character(Y)) - # compute the OOB-error
+		#                  as.numeric(as.character(predict(forest, OOB = T))))^2)
+			errRes = Error(forest, Y, selections[[i]], returnSE=T)
+			errors[i] =  errRes$error
+			SEerrors[i] = errRes$se
+		# define the next set of variables
+			if (recompute == F & i > 1) selections[[i - 1]] <- selections[[i]][-i]
+			if (recompute == T & i > 1) selections[[i - 1]] <- names(sort(Importance(forest, type), decreasing = T))[-i]
+				
+			if(i%%100==0)
+				cat("Diaz:", ncol(X)-i+1, "out of", ncol(X), "variables done\n")
+		}
+	} else{
+	  	varNum = ncol(X)
+	  	while(varNum>0){
+			
+			mtry = ChooseMtry(varNum,Y)
+			if(includeSeed){
+				seedVal = sum(as.numeric(gsub("X", "", selections[[varNum]])))
+				set.seed(seedVal)
+			}	
+			
+			nPts = nrow(dat)
+			RF = TrainForest(dat, mtry, ntree, type, selections[[varNum]], importance = T, corr.threshold=-0.1, 
+				maxLevel=floor(log2(0.368*nPts/4))) # 4 is minNumPtsPerPart (here fixed)
+			errRes = Error(forest, Y, selections[[varNum]], returnSE=T)
+			errors[varNum] =  errRes$error
+			SEerrors[varNum] = errRes$se
+			
+			varNumNext = round(varNum*(1-fracDropped)) 
+			if(varNumNext==varNum)
+				break
+			if (recompute == F & varNum > 1) selections[[varNumNext]] <- selections[[varNum]][-((varNumNext+1):varNum)]
+			if (recompute == T & varNum > 1) selections[[varNumNext]] <- names(sort(Importance(forest, type), decreasing = T))[-((varNumNext+1):varNum)] 
+			if(varNum%%10==0)
+				cat("Diaz-CPI:", varNum, "out of", ncol(X), "variables done\n")
+			varNum = varNumNext	
+		}
+	}	
+	# compute the error expected when no predictor is used at all
+	errors = c(Inf, errors)
+	SEerrors =c(0, SEerrors)
+	# define the number of variables determined by the 0 s.e. and 1 s.e. rule
+	optimum.number.0se <- which.min(errors)
+	optimum.number.1se <- which(errors <= min(errors, na.rm=T) + SEerrors[optimum.number.0se])[1] ### GGG standard error calculated on the predictions, not on multiple data sets...
+	# compute the corresponding forests and OOB-errors ### for regression standard error considered as zero -- to estimate it, complicated, several options, so leave as is
+	if (optimum.number.0se == 1) {forest.0se <- NULL; selection.0se <- NULL} ### GGG no features selected
+	if (optimum.number.1se == 1) {forest.1se <- NULL; selection.1se <- NULL}
+	if (optimum.number.0se != 1) {
+		selection.0se <- selections[[optimum.number.0se - 1]]
+		if(includeSeed){
+			seedVal = sum(as.numeric(gsub("X", "", selection.0se)))
+			set.seed(seedVal)
+		}	
+		forest.0se = TrainForest(dat, mtry, ntree, type, selection.0se)
+	}
+
+	if (optimum.number.1se != 1) {
+		selection.1se <- selections[[optimum.number.1se - 1]]
+		if(includeSeed){
+			seedVal = sum(as.numeric(gsub("X", "", selection.1se)))
+			set.seed(seedVal)
+		}	
+		forest.1se = TrainForest(dat, mtry, ntree, type, selection.1se)
+	}
+
+	oob.error.0se <- errors[optimum.number.0se]
+	oob.error.1se <- errors[optimum.number.1se]
+	return(list("selection.0se" = selection.0se, "forest.0se" = forest.0se, 
+		"oob.error.0se" = oob.error.0se, "selection.1se" = selection.1se, 
+		"forest.1se" = forest.1se, "oob.error.1se" = oob.error.1se, "perfStdErrBest"=SEerrors[optimum.number.0se]))
+}
+
 ########################
 ### The SVT approach ###
 ########################
