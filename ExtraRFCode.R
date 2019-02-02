@@ -61,11 +61,12 @@ Error = function(forest=NULL, Y=NULL, selectionNames="something", pred = NULL, r
 	}
 }
 
-Importance = function(forest, type) {
+Importance = function(forest, type, scale=F) {
 	if(type=="cforest"){
 		imp = varimp(forest, pre1.0_0=T) #### keeping just to have same code as in Hapfel
 	} else if (type=="randomForest"){
-		imp = importance(forest, scale=F)[,1] #### keeping just to have same code as in Hapfel	
+		imp = importance(forest, scale=scale, type=1)[,1] 
+		stopifnot(length(imp)>0) # it's zero if randomForest called without importance = T
 	} else{
 		stop("Incorrect forest type")
 	}
