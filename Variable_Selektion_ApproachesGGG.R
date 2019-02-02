@@ -401,7 +401,7 @@ DiazGGGCPI <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", f
 ### The SVT approach ###
 ########################
 SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = ifelse(ncol(X)>1000, 10, 20), allVariables = F, type="randomForest") {
-	# defaults as in papers -- for ntree they are not too specific, but certainly >=1000
+	# defaults as in papers -- for ntree they are not too specific, but certainly >=1000; note that SVT uses scale = T
   # Y: response vector
   # X: matrix or data frame containing the predictors
   # ntree: number of trees contained in a forest
@@ -425,7 +425,7 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = ifelse(ncol(X)>1
 	forest = TrainForest(dat, mtry, ntree, type, importance=T)
 
   #final.imps <- names(sort(varimp(forest, pre1.0_0 = T), decreasing = T)) # the final sequence
-  final.imps <- names(sort(Importance(forest, type), decreasing = T)) # the final sequence
+  final.imps <- names(sort(Importance(forest, type, scale=T), decreasing = T)) # the final sequence
 
 	errors <- array(NA, dim = c(repetitions, ncol(X) + 1, folds))
 
@@ -442,7 +442,7 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = ifelse(ncol(X)>1
 	forest = TrainForest(train, mtry, ntree, type, importance=T)
 
       #selection <- names(sort(varimp(forest, pre1.0_0 = T), decreasing = T))
-      selection <- names(sort(Importance(forest, type), decreasing = T))
+      selection <- names(sort(Importance(forest, type, scale=T), decreasing = T))
 	  if(allVariables){
 	  	for (i in ncol(X):1) {
 	  		mtry = min(mtry, ChooseMtry(i,Y))
