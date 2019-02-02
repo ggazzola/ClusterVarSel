@@ -14,7 +14,7 @@ TrainForest = function(dat, mtry, ntree, type, selectionNames=NULL, ...) {
 		forest <- cforest(trainFormula, data = dat, controls = cforest_unbiased(mtry = mtry, ntree = ntree), ...)
 	} else if (type == "randomForest") {
 		#forest <- randomForest(trainFormula, data = dat, mtry = mtry, ntree = ntree, importance = T)
-		forest <- randomForest(X,Y, data = dat, mtry = mtry, ntree = ntree, keep.inbag = T, ...) # importance = T taken out, since typically useless
+		forest <- randomForest(X,Y, data = dat, mtry = mtry, ntree = ntree, keep.inbag = T, ...) # importance = T taken out, but MUST be specified whenever PI/CPI is to be calculated
 		
 	} else{
 		stop("Incorrect forest type")

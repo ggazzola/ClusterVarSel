@@ -40,7 +40,7 @@ NAPGGG <- function(Y, X, nperm = 400, ntree = 100, alpha = 0.05, type="randomFor
 		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
 		set.seed(seedVal)
 	} 
-	forest = TrainForest(dat, mtry, ntree, type)
+	forest = TrainForest(dat, mtry, ntree, type, importance=T)
   #obs.varimp <- varimp(forest, pre1.0_0 = T) # compute initial variable importances
 	obs.varimp = Importance(forest, type)
   selection <- names(obs.varimp)
@@ -58,7 +58,7 @@ NAPGGG <- function(Y, X, nperm = 400, ntree = 100, alpha = 0.05, type="randomFor
 		seedVal = sum(as.numeric(gsub("X", "", selection)))
 		set.seed(seedVal)
 	}	
-      perm.forest = TrainForest(perm.dat, mtry, ntree, type)
+      perm.forest = TrainForest(perm.dat, mtry, ntree, type, importance=T)
 	#perm.mat[i, j] <- varimp(perm.forest, pre1.0_0 = T)[j]}} # recompute the importances
 	perm.mat[i, j] = Importance(perm.forest, type)[j]}
 	if(cnt%%100==0 | j==length(selection))
@@ -141,7 +141,7 @@ ALTGGG <- function(Y, X, nperm = 400, ntree = 100, alpha = 0.05, type="randomFor
 		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
 		set.seed(seedVal)
 	}	
-	forest = TrainForest(dat, mtry, ntree, type)
+	forest = TrainForest(dat, mtry, ntree, type, importance=T)
 
 	# obs.varimp <- varimp(forest, pre1.0_0 = T) # compute initial variable importances
 	obs.varimp = Importance(forest, type)
@@ -159,7 +159,7 @@ ALTGGG <- function(Y, X, nperm = 400, ntree = 100, alpha = 0.05, type="randomFor
 		seedVal = sum(as.numeric(gsub("X", "", selection)))
 		set.seed(seedVal)
 	}	
-     perm.forest = TrainForest(perm.dat, mtry, ntree, type)
+     perm.forest = TrainForest(perm.dat, mtry, ntree, type, importance=T)
 
     perm.mat[i, ] <- Importance(perm.forest, type)
 	if(i%%100==0)
@@ -211,7 +211,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
 		set.seed(seedVal)
 	}	
-	forest = TrainForest(dat, mtry, ntree, type)
+	forest = TrainForest(dat, mtry, ntree, type, importance=T)
 	selections <- list() # a list that contains the sequence of selected variables
 	selections[[ncol(X)]] <- names(sort(Importance(forest, type), decreasing = T))
 	errors <- rep(NA, ncol(X))
@@ -223,7 +223,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 				seedVal = sum(as.numeric(gsub("X", "", selections[[i]])))
 				set.seed(seedVal)
 			}	
-			forest = TrainForest(dat, mtry, ntree, type, selections[[i]])
+			forest = TrainForest(dat, mtry, ntree, type, selections[[i]], importance=T)
 
 		#errors[i] <- mean((as.numeric(as.character(Y)) - # compute the OOB-error
 		#                  as.numeric(as.character(predict(forest, OOB = T))))^2)
@@ -246,7 +246,7 @@ DiazGGG <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", frac
 				seedVal = sum(as.numeric(gsub("X", "", selections[[varNum]])))
 				set.seed(seedVal)
 			}	
-			forest = TrainForest(dat, mtry, ntree, type, selections[[varNum]])
+			forest = TrainForest(dat, mtry, ntree, type, selections[[varNum]], importance=T)
 			errRes = Error(forest, Y, selections[[varNum]], returnSE=T)
 			errors[varNum] =  errRes$error
 			SEerrors[varNum] = errRes$se
@@ -308,9 +308,10 @@ DiazGGGCPI <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", f
 		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
 		set.seed(seedVal)
 	}	
-	forest = TrainForest(dat, mtry, ntree, type)
+	forest = TrainForest(dat, mtry, ntree, type, importance = T, corr.threshold=-0.1, 
+				maxLevel=floor(log2(0.368*nPts/4))) # 4 is minNumPtsPerPart (here fixed for simplicity -- BUGBUGBUG)
 	selections <- list() # a list that contains the sequence of selected variables
-	selections[[ncol(X)]] <- names(sort(Importance(forest, type), decreasing = T))
+	selections[[ncol(X)]] <- names(sort(Importance(forest, type), decreasing = T)) 
 	errors <- rep(NA, ncol(X))
 	SEerrors = rep(NA, ncol(X))
 	if(fracDropped==0){
@@ -321,7 +322,7 @@ DiazGGGCPI <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", f
 				seedVal = sum(as.numeric(gsub("X", "", selections[[i]])))
 				set.seed(seedVal)
 			}	
-			forest = TrainForest(dat, mtry, ntree, type, selections[[i]])
+			forest = TrainForest(dat, mtry, ntree, type, selections[[i]], importance=T)
 
 		#errors[i] <- mean((as.numeric(as.character(Y)) - # compute the OOB-error
 		#                  as.numeric(as.character(predict(forest, OOB = T))))^2)
@@ -346,8 +347,8 @@ DiazGGGCPI <- function(Y, X, recompute = F, ntree = 1000, type="randomForest", f
 			}	
 			
 			nPts = nrow(dat)
-			RF = TrainForest(dat, mtry, ntree, type, selections[[varNum]], importance = T, corr.threshold=-0.1, 
-				maxLevel=floor(log2(0.368*nPts/4))) # 4 is minNumPtsPerPart (here fixed)
+			forest = TrainForest(dat, mtry, ntree, type, selections[[varNum]], importance = T, corr.threshold=-0.1, 
+				maxLevel=floor(log2(0.368*nPts/4))) # 4 is minNumPtsPerPart (here fixed for simplicity -- BUGBUGBUG)
 			errRes = Error(forest, Y, selections[[varNum]], returnSE=T)
 			errors[varNum] =  errRes$error
 			SEerrors[varNum] = errRes$se
@@ -421,7 +422,7 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = ifelse(ncol(X)>1
 		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
 		set.seed(seedVal)
 	}	
-	forest = TrainForest(dat, mtry, ntree, type)
+	forest = TrainForest(dat, mtry, ntree, type, importance=T)
 
   #final.imps <- names(sort(varimp(forest, pre1.0_0 = T), decreasing = T)) # the final sequence
   final.imps <- names(sort(Importance(forest, type), decreasing = T)) # the final sequence
@@ -438,7 +439,7 @@ SVTGGG <- function(Y, X, ntree = 1000, folds = 5, repetitions = ifelse(ncol(X)>1
 		seedVal = sum(as.numeric(gsub("X", "", colnames(X))))
 		set.seed(seedVal) # GGG still ok to have this since train changes at every fold  
 	}	
-	forest = TrainForest(train, mtry, ntree, type)
+	forest = TrainForest(train, mtry, ntree, type, importance=T)
 
       #selection <- names(sort(varimp(forest, pre1.0_0 = T), decreasing = T))
       selection <- names(sort(Importance(forest, type), decreasing = T))
@@ -519,7 +520,7 @@ GenGGG <- function(Y, X, ntree = 2000, se.rule = 0, repetitions = ifelse(ncol(X)
 	names(dat) <- c("Y", colnames(X))
   	rankings <- matrix(NA, nrow = repetitions, ncol = ncol(X), dimnames = list(1:repetitions, names(dat)[-1]))
   	for (i in 1:repetitions) { # repeatedly assess ranking of variable importances ### GGG not setting seed here, else it's pointless to repeat
-		forest = TrainForest(dat, mtry, ntree, type)
+		forest = TrainForest(dat, mtry, ntree, type, importance=T)
  		rankings[i, ] <- Importance(forest, type)
 	} ### GGG rank multiple times, then compute average and sort variables based on it
 		selection <- names(sort(colMeans(rankings), decreasing = T))
