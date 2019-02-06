@@ -1347,16 +1347,19 @@ if(!onlyReturnName) {
 						# the below is correct only if "ClusterSimple" is the first element of resSim[[aaa]][[bbb]]
 				if(length(newEnv$resSim[[aaa]])>1)
 					for(bbb in 2:length(newEnv$resSim[[aaa]]))
-						newEnv$resSim[[aaa]][[bbb]] = list(NULL) # removing results for anything other than ClusterSimple, 
-																 # just to save some RAM
-			}
+					if(!newEnv$resSim[[aaa]][[bbb]]$method%in%methodVect){
+						newEnv$resSim[[aaa]][[bbb]] = list(NULL) # removing irrelevant results to warm start, to save RAM 
+					} else {
+						newEnv$resSim[[aaa]][[bbb]] = newEnv$resSim[[aaa]][[1]] # overwriting StroblRec/NonRec with ClusterSimple warm start
+					} 
+																	 													 
+			}	
 			stopifnot(identical(datAll, newEnv$datAll))
 			stopifnot(identical(numFolds, newEnv$numFolds))
 			stopifnot(identical(as.character(trueModelX), as.character(newEnv$trueModelX)))
 			stopifnot(identical(as.character(trueModelY), as.character(newEnv$trueModelY)))
 			stopifnot(identical(inIdxList, newEnv$inIdxList))
 			stopifnot(identical(outIdxList, newEnv$outIdxList))
-			
 			
 			assign("resSimExistingWarmStart", get("resSim", newEnv))
 			rm(newEnv)
@@ -1411,8 +1414,7 @@ if(!onlyReturnName) {
 			resSub = list()	
 			
 			if(useExistingWarmStart){
-				stopifnot(meth=="ClusterSimple")
-				stopifnot(cntMu==1)
+				stopifnot(meth%in%c("ClusterSimple", "StroblNonRec", "StroblRec"))
 				subPerfMeanVect = resSimExistingWarmStart[[sim]][[cntMu]]$perfMeanVect
 				subPerfMeanVect[1:numVarAfterExistingWarmStart] = 0
 				subPerfSEVect = resSimExistingWarmStart[[sim]][[cntMu]]$perfSEVect
