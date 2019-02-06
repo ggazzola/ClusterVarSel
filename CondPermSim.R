@@ -1356,6 +1356,7 @@ if(!onlyReturnName) {
 					for(methCurr in methodVect[-1]){
 						stopifnot(methCurr%in%c("StroblNonRec", "StroblRec"))
 						newEnv$resSim[[aaa]][[cntExtraMeth]] = newEnv$resSim[[aaa]][[1]] # overwriting StroblRec/NonRec with ClusterSimple warm start
+						newEnv$resSim[[aaa]][[cntExtraMeth]]$method = methCurr
 						cntExtraMeth = cntExtraMeth+1
 					}
 				}		 														 													 
@@ -1483,7 +1484,7 @@ if(!onlyReturnName) {
 					if((meth=="StroblRec" | (meth=="StroblNonRec" & pSub==ifelse(warmStart, numVarAfterWarmStart, p))) & !doWarmStart){
 						# Calculate CONDITIONAL IMPORTANCE BY randomForest:
 						# * Always, if StroblRec AND NOT doWarmStart
-						# * Only at the first iteration (pSub=p), if StroblRec AND NOT doWarmStart
+						# * Only at the first iteration (pSub=p or numVarAfterWarmStart), if StroblNonRec AND NOT doWarmStart
 						
 						#corr.thresh = 0.2
 						#if(pSub>1)
