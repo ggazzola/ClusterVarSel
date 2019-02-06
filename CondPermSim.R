@@ -1345,14 +1345,20 @@ if(!onlyReturnName) {
 			for(aaa in 1:length(newEnv$resSim)){
 				stopifnot(newEnv$resSim[[aaa]][[1]]$method=="ClusterSimple")
 						# the below is correct only if "ClusterSimple" is the first element of resSim[[aaa]][[bbb]]
-				if(length(newEnv$resSim[[aaa]])>1)
-					for(bbb in 2:length(newEnv$resSim[[aaa]]))
-					if(!newEnv$resSim[[aaa]][[bbb]]$method%in%methodVect){
-						newEnv$resSim[[aaa]][[bbb]] = list(NULL) # removing irrelevant results to warm start, to save RAM 
-					} else {
-						newEnv$resSim[[aaa]][[bbb]] = newEnv$resSim[[aaa]][[1]] # overwriting StroblRec/NonRec with ClusterSimple warm start
-					} 
-																	 													 
+				if(length(newEnv$resSim[[aaa]])>1){
+					for(bbb in 2:length(newEnv$resSim[[aaa]])){
+							newEnv$resSim[[aaa]][[bbb]] = list(NULL) # removing all other results to save RAM 
+
+					}
+				}
+				cntExtraMeth = 2
+				if(length(methodVect)>1){
+					for(methCurr in methodVect[-1]){
+						stopifnot(methCurr%in%c("StroblNonRec", "StroblRec"))
+						newEnv$resSim[[aaa]][[cntExtraMeth]] = newEnv$resSim[[aaa]][[1]] # overwriting StroblRec/NonRec with ClusterSimple warm start
+						cntExtraMeth = cntExtraMeth+1
+					}
+				}		 														 													 
 			}	
 			stopifnot(identical(datAll, newEnv$datAll))
 			stopifnot(identical(numFolds, newEnv$numFolds))
@@ -1414,7 +1420,6 @@ if(!onlyReturnName) {
 			resSub = list()	
 			
 			if(useExistingWarmStart){
-				stopifnot(meth%in%c("ClusterSimple", "StroblNonRec", "StroblRec"))
 				subPerfMeanVect = resSimExistingWarmStart[[sim]][[cntMu]]$perfMeanVect
 				subPerfMeanVect[1:numVarAfterExistingWarmStart] = 0
 				subPerfSEVect = resSimExistingWarmStart[[sim]][[cntMu]]$perfSEVect
