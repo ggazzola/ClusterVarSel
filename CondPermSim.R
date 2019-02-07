@@ -1309,6 +1309,8 @@ fileNameFinalExists = file.exists(fileNameFinal)
 if(useExistingWarmStart){
 	stopifnot(length(methodVect)==1)
 	stopifnot(methodVect%in%c("ClusterSimple", "StroblNonRec", "StroblRec"))
+	stopifnot(length(toDo)==1)
+	stopifnot(toDo=="GGG")
 	if(!fileNameFinalExists){
 		fileList = list.files()
 		fileForExistingWarmStart = fileList[grep("SelVar.RData", fileList)]
