@@ -1307,11 +1307,8 @@ fileNameFinal = paste(fileName, "SelVar.RData", sep="")
 
 fileNameFinalExists = file.exists(fileNameFinal)
 if(useExistingWarmStart){
-	stopifnot(length(methodVect)==1)	
+	stopifnot(length(methodVect)==1)
 	stopifnot(methodVect%in%c("ClusterSimple", "StroblNonRec", "StroblRec"))
-	stopifnot(length(toDo)==1)
-	stopifnot(toDo=="GGG")
-	
 	if(!fileNameFinalExists){
 		fileList = list.files()
 		fileForExistingWarmStart = fileList[grep("SelVar.RData", fileList)]
@@ -1486,7 +1483,6 @@ if(!onlyReturnName) {
 						# Calculate CONDITIONAL IMPORTANCE BY randomForest:
 						# * Always, if StroblRec AND NOT doWarmStart
 						# * Only at the first iteration (pSub=p or numVarAfterWarmStart), if StroblNonRec AND NOT doWarmStart
-						cat("Calculating conditional importance with", meth, "\n")
 						
 						#corr.thresh = 0.2
 						#if(pSub>1)
