@@ -18,15 +18,14 @@ what = "Hapf20D" #Hapf20D, Hapf20DDecreasCov, Hapf20DClass, Hapf11DPoly2, Hapf11
 # WHY FOR FMRI NEED MORE STERRORS TO REACH  PERFORMANCE AS GOOD AS, E.G., DIAZ1? SHOULDN'T HAVE TO DO WITH THE WAY SERR IS CALCULATED 
 #	B/C IF USE DEFMTRY SHOULD BE THE SAME AS FOR COMPETING METHODS
 extraNam = "" ###############
-methodVect = c("ClusterSimple", "StroblNonRec") ############### ClusterSimple; Strob goes with GGG
+methodVect = c("ClusterSimple", "StroblNonRec", "StroblRec") ############### ClusterSimple; Strob goes with GGG
 toDo = c("GGG", "competing")     ############################
 forestType = "randomForest" # cforest, randomForest
 defaultMtry = T  ############################
 useExistingWarmStart = F
 if(useExistingWarmStart){
-	methodVect = "ClusterSimple"
 	toDo = "GGG"
-	cat("Forcing methodVect 'ClusterSimple' and toDo = 'GGG'\n")
+	cat("toDo = 'GGG'\n")
 	numVarAfterExistingWarmStart = 200
 } else{
 	numVarAfterExistingWarmStart = NULL

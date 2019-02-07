@@ -1307,6 +1307,8 @@ fileNameFinal = paste(fileName, "SelVar.RData", sep="")
 
 fileNameFinalExists = file.exists(fileNameFinal)
 if(useExistingWarmStart){
+	stopifnot(length(methodVect)==1)
+	stopifnot(methodVect%in%c("ClusterSimple", "StroblNonRec", "StroblRec"))
 	if(!fileNameFinalExists){
 		fileList = list.files()
 		fileForExistingWarmStart = fileList[grep("SelVar.RData", fileList)]
@@ -1345,21 +1347,17 @@ if(!onlyReturnName) {
 			for(aaa in 1:length(newEnv$resSim)){
 				stopifnot(newEnv$resSim[[aaa]][[1]]$method=="ClusterSimple")
 						# the below is correct only if "ClusterSimple" is the first element of resSim[[aaa]][[bbb]]
+						
 				if(length(newEnv$resSim[[aaa]])>1){
 					for(bbb in 2:length(newEnv$resSim[[aaa]])){
 							newEnv$resSim[[aaa]][[bbb]] = list(NULL) # removing all other results to save RAM 
 
 					}
 				}
-				cntExtraMeth = 2
-				if(length(methodVect)>1){
-					for(methCurr in methodVect[-1]){
-						stopifnot(methCurr%in%c("StroblNonRec", "StroblRec"))
-						newEnv$resSim[[aaa]][[cntExtraMeth]] = newEnv$resSim[[aaa]][[1]] # overwriting StroblRec/NonRec with ClusterSimple warm start
-						newEnv$resSim[[aaa]][[cntExtraMeth]]$method = methCurr
-						cntExtraMeth = cntExtraMeth+1
-					}
-				}		 														 													 
+				newEnv$resSim[[aaa]][[1]]$method = methodVect # methodVect here is only ONE of ClusterSimple,
+						# StroblNonRec or StroblRec. If ClusterSimple, this line does nothing; otherwise, it's used
+						# to replace the first element (ClusterSimple) with the warm-started Strobl method (for coding simplicity)
+	
 			}	
 			stopifnot(identical(datAll, newEnv$datAll))
 			stopifnot(identical(numFolds, newEnv$numFolds))
