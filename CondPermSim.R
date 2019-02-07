@@ -1479,7 +1479,7 @@ if(!onlyReturnName) {
 					
 					
 					# in all the below, importance is calculated ONLY when necessary, to save computational costs
-					if((meth=="StroblRec" | (meth=="StroblNonRec" & pSub==ifelse(warmStart, numVarAfterWarmStart, p))) & !doWarmStart){
+					if((meth=="StroblRec" | (meth=="StroblNonRec" & pSub==ifelse(useExistingWarmStart, numVarAfterWarmStart, p))) & !doWarmStart){
 						# Calculate CONDITIONAL IMPORTANCE BY randomForest:
 						# * Always, if StroblRec AND NOT doWarmStart
 						# * Only at the first iteration (pSub=p or numVarAfterWarmStart), if StroblNonRec AND NOT doWarmStart
@@ -1638,7 +1638,7 @@ if(!onlyReturnName) {
 						
 						} 
 					
-						if(meth=="StroblNonRec" & pSub==ifelse(warmStart, numVarAfterWarmStart, p)){
+						if(meth=="StroblNonRec" & pSub==ifelse(useExistingWarmStart, numVarAfterWarmStart, p)){
 							if(warmStart & (pSub!=numVarAfterWarmStart)) {
 								stop("pSub!=numVarAfterWarmStart")
 								# this should never happen, because we are in the !doWarmStart case
