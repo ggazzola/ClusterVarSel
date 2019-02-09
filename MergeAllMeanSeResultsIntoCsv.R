@@ -52,7 +52,7 @@ newMeanMat[,1]=as.character(newMeanMat[,1])
 
 methNames = newMeanMat[,1]
 
-toKeep = c("ClusterSimple0", "ClusterSimple1", "Cluster0", "Cluster1", "StroblNonRec0", "StroblNonRec1", 
+toKeep = c("ClusterSimple0", "ClusterSimple1", "Cluster0", "Cluster1", "StroblRec0", "StroblRec1", "StroblNonRec0", "StroblNonRec1", 
 	"Nap", "NapB", "Alt", "Diaz", "Diaz1", "DiazRecomp", "DiazRecomp1", "DiazCPI", "DiazCPI1", "DiazRecompCPI", "DiazRecompCPI1",
 	"Svt", "GenP", "GenI", "Boruta", "GRF", "GRRF")
 
@@ -60,15 +60,16 @@ newMeanMat = newMeanMat[methNames%in%toKeep,]
 newSeMat = newSeMat[methNames%in%toKeep,]
 methNames = methNames[methNames%in%toKeep]
 
+methNames = gsub("Nap", "Hap", methNames)
 methNames[methNames=="DiazRecomp"] = "DiazRecomp0"
 methNames[methNames=="Diaz"] = "Diaz0"
+methNames = gsub("DiazRecompCPI", "Jiang-Strobl", methNames) # this should be run before methNames = gsub("DiazRecomp", "Jiang", methNames), else the renaming won't work
 methNames = gsub("DiazRecomp", "Jiang", methNames)
 methNames = gsub("ClusterSimple", "DBC-RCPI", methNames)
 methNames = gsub("Cluster", "DBC-RCPI", methNames)
 methNames = gsub("StroblNonRec", "Strobl-CPI", methNames)
 methNames = gsub("StroblRec", "Strobl-RCPI", methNames)
 methNames = gsub("DiazCPI", "Diaz-Strobl", methNames)
-methNames = gsub("DiazRecompCPI", "Jiang-Strobl", methNames)
 
 newMeanMat[,1]=methNames
 newSeMat[,1]=methNames
@@ -94,10 +95,11 @@ if(length(whichStroblCPI)>0){
 	
 	newMeanMat = rbind(newMeanMat, stroblCPIMeanRows)
 	newSeMat = rbind(newSeMat, stroblCPISeRows)
+	methNames= newMeanMat[,1]
 }
 
-whichStroblCPI = grep("Strobl-RCPI", methNames)
-if(length(whichStroblCPI)>0){
+whichStroblRCPI = grep("Strobl-RCPI", methNames)
+if(length(whichStroblRCPI)>0){
 	stroblRCPIMeanRows = newMeanMat[whichStroblRCPI,]
 	stroblRCPISeRows = newSeMat[whichStroblRCPI,]
 	
@@ -106,6 +108,7 @@ if(length(whichStroblCPI)>0){
 	
 	newMeanMat = rbind(newMeanMat, stroblRCPIMeanRows)
 	newSeMat = rbind(newSeMat, stroblRCPISeRows)
+	methNames= newMeanMat[,1]
 }
 
 whichDiazStrobl = grep("Diaz-Strobl", methNames)
@@ -118,6 +121,7 @@ if(length(whichDiazStrobl)>0){
 	
 	newMeanMat = rbind(newMeanMat, diazStroblMeanRows)
 	newSeMat = rbind(newSeMat, diazStroblSeRows)
+	methNames= newMeanMat[,1]
 }
 
 whichJiangStrobl = grep("Jiang-Strobl", methNames)
@@ -130,6 +134,7 @@ if(length(whichJiangStrobl)>0){
 	
 	newMeanMat = rbind(newMeanMat, jiangStroblMeanRows)
 	newSeMat = rbind(newSeMat, jiangStroblSeRows)
+	methNames= newMeanMat[,1]
 }
 
 
