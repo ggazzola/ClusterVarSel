@@ -58,7 +58,7 @@ if(competingMethods) {
 	}
 	
 	if("GRRF"%in%methodVect){
-		stopifnot("GenP"%in%methodVect)
+		stopifnot("GRF"%in%methodVect)
 		stopifnot(which(methodVect=="GRF")<which(methodVect=="GRRF"))	
 	}
 	

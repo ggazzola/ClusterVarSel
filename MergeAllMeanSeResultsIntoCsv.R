@@ -9,7 +9,7 @@ whichGGGMean=grep("MeanGGGOverall", fileList)
 whichGGGSe=grep("SeGGGOverall", fileList)
 existsGGG = length(whichGGGMean)==1 & length(whichGGGSe)==1
 
-roundingFactor = 3
+roundingFactor = 2
 multiply = F
 if(existsGGG){
 	nameSim = strsplit(fileList[whichGGGMean], "MeanGGG")[[1]][1] 
@@ -180,7 +180,7 @@ colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\\mathcal{v}}
 
 for(i in 1:nrow(newMeanMat)){
 	for(j in 2:3){
-		newMeanMat[i, j] = paste(abs(round(as.numeric(newMeanMat[i,j]), roundingFactor)), abs(round(as.numeric(newSeMat[i,j]), 3)), sep="\\pm")
+		newMeanMat[i, j] = paste(abs(round(as.numeric(newMeanMat[i,j]), roundingFactor)), abs(round(as.numeric(newSeMat[i,j]), roundingFactor)), sep="\\pm")
 	}
 	currMeth = newMeanMat[i,1] 
 	currMeth = paste0("\\text{\\textsf{", currMeth, "}}")
