@@ -9,7 +9,10 @@ whichGGGMean=grep("MeanGGGOverall", fileList)
 whichGGGSe=grep("SeGGGOverall", fileList)
 existsGGG = length(whichGGGMean)==1 & length(whichGGGSe)==1
 
-roundingFactor = 2
+roundingFactor = 3
+negativeSpaces = 3
+negSpStr = paste(rep("\\!", negativeSpaces), collapse="")
+
 multiply = F
 if(existsGGG){
 	nameSim = strsplit(fileList[whichGGGMean], "MeanGGG")[[1]][1] 
@@ -59,7 +62,6 @@ toKeep = c("ClusterSimple0", "ClusterSimple1", "Cluster0", "Cluster1", "StroblRe
 newMeanMat = newMeanMat[methNames%in%toKeep,]
 newSeMat = newSeMat[methNames%in%toKeep,]
 methNames = methNames[methNames%in%toKeep]
-
 methNames = gsub("Nap", "Hap", methNames)
 methNames[methNames=="DiazRecomp"] = "DiazRecomp0"
 methNames[methNames=="Diaz"] = "Diaz0"
@@ -70,6 +72,8 @@ methNames = gsub("Cluster", "DBC-RCPI", methNames)
 methNames = gsub("StroblNonRec", "Strobl-CPI", methNames)
 methNames = gsub("StroblRec", "Strobl-RCPI", methNames)
 methNames = gsub("DiazCPI", "Diaz-Strobl", methNames)
+
+
 
 newMeanMat[,1]=methNames
 newSeMat[,1]=methNames
@@ -176,7 +180,9 @@ newMeanMat[, 5] =  round((newMeanMat[whichLEBM,3]-newMeanMat[, 3])/newMeanMat[wh
 
 #colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\mathcal{v}}}", "\\bs{\\tilde{\mathcal{v}}}", "\\bs{\\bar{\mathcal{v}}_s}", 
 	#"\\bs{\\bar{e}}",  "\\bs{\\tilde{e}}",  "\\bs{\\bar{e}_s}")
-colnames(newMeanMat) = c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\\mathcal{v}}^*}", "\\bs{\\bar{e}^*}", "\\bs{r_{\\bar{v}^*}}", "\\bs{r_{\\bar{e}^*}}")
+
+colnames(newMeanMat) = paste0(paste0(negSpStr, c("\\text{\\bfseries{Method}}", "\\bs{\\bar{\\mathcal{v}}^*}", "\\bs{\\bar{e}^*}", 
+	"\\bs{r_{\\bar{v}^*}}", "\\bs{r_{\\bar{e}^*}}")), negSpStr)
 
 for(i in 1:nrow(newMeanMat)){
 	for(j in 2:3){
@@ -187,6 +193,12 @@ for(i in 1:nrow(newMeanMat)){
 	newMeanMat[i,1]  = currMeth
 }	
 
+for(i in 1:nrow(newMeanMat)){
+	for(j in 1:ncol(newMeanMat)){
+		newMeanMat[i,j] = paste0(paste0(negSpStr, newMeanMat[i,j]), negSpStr)
+	}
+}
+	
 write.csv(newMeanMat, file=paste(nameSim, "MergedMeanSe.csv", sep=""), quote=F, row.names=F)
 
 cat(nameSim, "DONE \n")
