@@ -1,3 +1,4 @@
+# Adapted from 'party' package 
 ###### --> refers to stuff commented out in March 2016, to speeed things up and reduce memory usage
 
 ExtractSingleTreeForest = function(cartRF, treeIdx){
