@@ -625,21 +625,3 @@ GRFGGG = function(Y, X, ntree=1000, gammaGRF=1, gammaGRRF=ifelse(is.factor(Y), 0
 	return(list("selectionGRF" = selectionGRF, "selectionGRRF" = selectionGRRF))
 }
 
-if(F){
-	#load("brain.RData")
-	#X = dat[,1:ncol(dat)]
-	#Y = dat$Y
-	X = matrix(rnorm(100), nrow=50)
-	Y = apply(X, 1, sum)
-	resNAPGGG = NAPGGG(Y, X, ntree=50, nperm=50)
-
-	resALTGGG = ALTGGG(Y, X, ntree=50)
-
-	resDiazGGG = DiazGGG(Y, X, ntree=50)
-
-	resSVTGGG = SVTGGG(Y, X, ntree=50, repetitions=5)
-
-	resGenGGG = GenGGG(Y, X, ntree=50, repetitions=5)
-
-
-}
