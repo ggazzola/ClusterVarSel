@@ -1,14 +1,5 @@
-################################################################################
-###                  R-Code for the Manuscript                               ###
-###     `A new variable selection approach using Random Forests'             ###
-###                   Author: Alexander Hapfelmeier                          ###
-###                       Date: 9 March 2012                                 ###
-###                        R version 2.14.1                                  ###
-###                                                                          ###
-###                  Variable Selection Approaches                           ###
-###                                                                          ###
-################################################################################
 
+#Adaptation of prior R code by  Alexander Hapfelmeier for "A new variable selection approach using Random Forests"    
 ## assumes includeSeed global variable exists
 
 
